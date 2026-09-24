@@ -1,0 +1,50 @@
+import type { Workout } from '../types';
+import { items } from './helpers';
+
+export const ABS: Workout[] = [
+  {
+    id: 'core-circuit',
+    name: 'Core Circuit',
+    category: 'abs',
+    format: 'circuit',
+    intensity: 'standard',
+    description: 'Front, sides and deep core. Five moves, three rounds.',
+    rounds: 3,
+    items: items('dead-bug', 'russian-twist', 'plank-drag', 'weighted-crunch', 'side-plank'),
+    warmup: 'full',
+    cooldown: 'core',
+  },
+  {
+    id: 'core-ladder',
+    name: 'Core Ladder',
+    category: 'abs',
+    format: 'circuit',
+    intensity: 'standard',
+    description: 'Eight core moves, standing and on the floor, twice through.',
+    rounds: 2,
+    items: items(
+      'woodchop',
+      'toe-reach',
+      'bicycle-crunch',
+      'dead-bug',
+      'farmer-march',
+      'russian-twist',
+      'plank-drag',
+      'side-plank',
+    ),
+    warmup: 'full',
+    cooldown: 'core',
+  },
+  {
+    id: 'heavy-core',
+    name: 'Heavy Core',
+    category: 'abs',
+    format: 'circuit',
+    intensity: 'heavy',
+    description: 'Loaded crunches, chops and carries. Slow and strong.',
+    rounds: 3,
+    items: items('weighted-crunch', 'woodchop', 'farmer-march', 'russian-twist', 'dead-bug'),
+    warmup: 'full',
+    cooldown: 'core',
+  },
+];

@@ -1,0 +1,50 @@
+import type { Workout } from '../types';
+import { items } from './helpers';
+
+export const ARMS: Workout[] = [
+  {
+    id: 'arm-sculpt-circuit',
+    name: 'Arm Sculpt Circuit',
+    category: 'arms',
+    format: 'circuit',
+    intensity: 'standard',
+    description: 'Biceps, triceps and shoulders. Five moves, three rounds.',
+    rounds: 3,
+    items: items('bicep-curl', 'overhead-triceps-extension', 'hammer-curl', 'triceps-kickback', 'lateral-raise'),
+    warmup: 'upper',
+    cooldown: 'upper',
+  },
+  {
+    id: 'biceps-triceps-pump',
+    name: 'Biceps & Triceps Pump',
+    category: 'arms',
+    format: 'circuit',
+    intensity: 'standard',
+    description: 'Eight arm and shoulder moves, twice through, finishing with push-ups.',
+    rounds: 2,
+    items: items(
+      'bicep-curl',
+      'skull-crusher',
+      'hammer-curl',
+      'triceps-kickback',
+      'arnold-press',
+      'overhead-triceps-extension',
+      'front-raise',
+      'push-up',
+    ),
+    warmup: 'upper',
+    cooldown: 'upper',
+  },
+  {
+    id: 'heavy-arms',
+    name: 'Heavy Arms',
+    category: 'arms',
+    format: 'circuit',
+    intensity: 'heavy',
+    description: 'Heavier dumbbells, slow controlled reps. Quality over speed.',
+    rounds: 3,
+    items: items('bicep-curl', 'skull-crusher', 'hammer-curl', 'overhead-triceps-extension', 'shoulder-press'),
+    warmup: 'upper',
+    cooldown: 'upper',
+  },
+];

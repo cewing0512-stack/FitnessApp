@@ -1,0 +1,56 @@
+import type { Workout } from '../types';
+import { items } from './helpers';
+
+export const LEGS: Workout[] = [
+  {
+    id: 'leg-day-basics',
+    name: 'Leg Day Basics',
+    category: 'legs',
+    format: 'circuit',
+    intensity: 'standard',
+    description: 'Squat, lunge and hinge. Goblet squats go heavy.',
+    rounds: 3,
+    items: items(
+      { exerciseId: 'goblet-squat', heavy: true },
+      'reverse-lunge',
+      'single-leg-rdl',
+      'lateral-lunge',
+      'calf-raise',
+    ),
+    warmup: 'lower',
+    cooldown: 'lower',
+  },
+  {
+    id: 'leg-burner-ladder',
+    name: 'Leg Burner Ladder',
+    category: 'legs',
+    format: 'circuit',
+    intensity: 'standard',
+    description: 'Eight leg moves, two rounds, all angles covered.',
+    rounds: 2,
+    items: items(
+      'sumo-squat',
+      'split-squat',
+      'romanian-deadlift',
+      'curtsy-lunge',
+      'goblet-squat',
+      'single-leg-rdl',
+      'lateral-lunge',
+      'calf-raise',
+    ),
+    warmup: 'lower',
+    cooldown: 'lower',
+  },
+  {
+    id: 'heavy-legs',
+    name: 'Heavy Legs',
+    category: 'legs',
+    format: 'circuit',
+    intensity: 'heavy',
+    description: 'Big leg lifts with heavier dumbbells and slow reps.',
+    rounds: 3,
+    items: items('sumo-squat', 'reverse-lunge', 'romanian-deadlift', 'goblet-squat', 'calf-raise'),
+    warmup: 'lower',
+    cooldown: 'lower',
+  },
+];
