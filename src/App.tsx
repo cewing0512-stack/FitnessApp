@@ -1,39 +1,42 @@
-import { CATEGORIES, CATEGORY_LABELS } from './data/types';
-import { WORKOUTS, summarizeWorkout } from './data/library';
-import { EXERCISES } from './data/exercises';
-import { formatMinutes } from './engine/timeline';
+import { useEffect } from 'react';
+import { Outlet, RouterProvider, ScrollRestoration, createBrowserRouter, useMatch } from 'react-router';
+import { TabBar } from './components/TabBar';
+import { ComingSoon } from './screens/ComingSoon';
+import { Library } from './screens/Library';
+import { WorkoutDetail } from './screens/WorkoutDetail';
+import { useApp } from './state/store';
 
-/** Phase 1 preview: a plain read-out of the seeded library. Replaced by the real screens in Phase 2. */
-export default function App() {
+function Root() {
+  const hydrate = useApp((s) => s.hydrate);
+  useEffect(() => {
+    void hydrate();
+  }, [hydrate]);
+
+  // The tab bar only shows on the top-level screens.
+  const onWorkout = useMatch('/workout/*');
   return (
-    <main className="mx-auto max-w-xl px-4 pb-16 pt-[max(1.5rem,env(safe-area-inset-top))]">
-      <h1 className="text-3xl font-semibold tracking-tight">Dumbbell Library</h1>
-      <p className="mt-1 text-sm text-white/50">
-        {WORKOUTS.length} workouts · {EXERCISES.length} exercises (data preview)
-      </p>
-      {CATEGORIES.map((c) => (
-        <section key={c} className="mt-8">
-          <h2 className="text-sm font-medium uppercase tracking-widest text-white/40">{CATEGORY_LABELS[c]}</h2>
-          <ul className="mt-3 space-y-2">
-            {WORKOUTS.filter((w) => w.category === c).map((w) => {
-              const s = summarizeWorkout(w);
-              return (
-                <li key={w.id} className="rounded-2xl border border-line bg-surface p-4">
-                  <div className="flex items-baseline justify-between gap-3">
-                    <span className="text-lg font-medium">{w.name}</span>
-                    <span className="shrink-0 text-sm tabular-nums text-white/60">{formatMinutes(s.durationSec)}</span>
-                  </div>
-                  <div className="mt-1 text-sm text-white/50">
-                    {w.format === 'circuit' ? `${w.items.length} × ${w.rounds} rounds` : `${s.workBlocks} straight`} ·{' '}
-                    {s.exerciseCount} exercises ·{' '}
-                    <span className={w.intensity === 'heavy' ? 'text-heavy' : ''}>{s.weightLabel}</span>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      ))}
-    </main>
+    <>
+      <Outlet />
+      {!onWorkout && <TabBar />}
+      <ScrollRestoration />
+    </>
   );
+}
+
+const router = createBrowserRouter([
+  {
+    element: <Root />,
+    children: [
+      { path: '/', element: <Library /> },
+      { path: '/workout/:id', element: <WorkoutDetail /> },
+      { path: '/workout/:id/play', element: <ComingSoon title="Player" phase={3} back="/" /> },
+      { path: '/history', element: <ComingSoon title="History" phase={3} /> },
+      { path: '/settings', element: <ComingSoon title="Settings" phase={3} /> },
+      { path: '*', element: <ComingSoon title="Not found" back="/" /> },
+    ],
+  },
+]);
+
+export default function App() {
+  return <RouterProvider router={router} />;
 }

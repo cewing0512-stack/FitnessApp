@@ -2,7 +2,7 @@
 
 A personal dumbbell workout **library** PWA. You browse and pick a workout yourself. The app never schedules anything.
 
-> Status: **Phase 1 of 5** is done: the data model and seeded library. Screens, player, PWA and video pipeline come next.
+> Status: **Phases 1–2 of 5** are done: the data model, seeded library, and Library + Workout Detail screens. The player, PWA and video pipeline come next.
 
 ## Develop
 
@@ -52,3 +52,12 @@ Add an object to the category file in `src/data/workouts/`:
 Durations are never typed in. They're computed as warm-up (3 min) + get-ready + work/rest blocks + cool-down (2.5 min). At the default 60s work / 30s rest, **15–16 work blocks ≈ 28–30 min**, so use 5 × 3, 8 × 2, or 16 straight. Validation warns if a workout falls outside 27–32 min.
 
 For one-sided moves in a straight-through workout, use `...bothSides('split-squat')` to give each side a full 60s block. Otherwise the block is split 30s per side.
+
+## Demo media
+
+Drop files into `public/videos/` named after an exercise or move id:
+
+- `{id}.mp4` (and optionally `{id}.webm`) for the looping demo clip
+- `{id}.jpg` for the thumbnail and poster
+
+The app detects them automatically through a small Vite plugin (`vite/media-index.ts`). Until a file exists, the app shows a clean placeholder, so it's fully usable without any videos.
