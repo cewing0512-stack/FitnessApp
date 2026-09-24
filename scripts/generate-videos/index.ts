@@ -180,8 +180,10 @@ async function generate() {
 
   const failures: { id: string; error: string }[] = [];
   let next = 0;
+  // A quota error means every later request will fail too, so stop starting new clips.
+  let quotaHit = false;
   const worker = async () => {
-    while (next < specs.length) {
+    while (next < specs.length && !quotaHit) {
       const s = specs[next++]!;
       const log = (msg: string) => console.log(`  [${s.id}] ${msg}`);
       const raw = path.join(PATHS.raw, `${s.id}.mp4`);
@@ -207,12 +209,20 @@ async function generate() {
         const error = e instanceof Error ? e.message : String(e);
         failures.push({ id: s.id, error });
         log(`✗ ${error}`);
+        if (/RESOURCE_EXHAUSTED|"code":429/.test(error)) quotaHit = true;
       }
     }
   };
   await Promise.all(Array.from({ length: Math.min(concurrency, specs.length) }, worker));
 
-  console.log(`\nFinished: ${specs.length - failures.length}/${specs.length} clips.`);
+  const notStarted = specs.length - next;
+  console.log(`\nFinished: ${next - failures.length}/${specs.length} clips.`);
+  if (quotaHit) {
+    console.log(
+      `Stopped: the API quota is used up (${notStarted} clips not started). ` +
+        'Check https://ai.dev/rate-limit, then re-run the same command later to continue.',
+    );
+  }
   if (failures.length) {
     console.log('Failed (re-run the same command to retry just these):');
     for (const f of failures) console.log(`  ${f.id}: ${f.error}`);
