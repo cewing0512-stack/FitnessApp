@@ -23,13 +23,15 @@ export function createVeoProvider(opts: VeoOptions): VideoProvider & ImageProvid
 
     async generate(req: VideoRequest) {
       const started = Date.now();
+      // Veo rejects negativePrompt alongside reference images, so fold it into the prompt instead.
+      const prompt = req.referenceImage ? `${req.prompt}\n\nAvoid: ${req.negativePrompt}.` : req.prompt;
       let op = await ai.models.generateVideos({
         model: opts.model,
-        prompt: req.prompt,
+        prompt,
         config: {
           aspectRatio: req.aspectRatio,
           durationSeconds: req.durationSec,
-          negativePrompt: req.negativePrompt,
+          ...(req.referenceImage ? {} : { negativePrompt: req.negativePrompt }),
           personGeneration: opts.personGeneration,
           numberOfVideos: 1,
           ...(req.referenceImage
