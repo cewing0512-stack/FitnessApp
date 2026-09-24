@@ -9,7 +9,12 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b",
+    "videos": "tsx scripts/generate-videos/index.ts generate",
+    "videos:prompts": "tsx scripts/generate-videos/index.ts prompts",
+    "videos:status": "tsx scripts/generate-videos/index.ts status",
+    "videos:character": "tsx scripts/generate-videos/index.ts character",
+    "videos:import": "tsx scripts/generate-videos/index.ts import"
   },
   "dependencies": {
     "idb": "^8.0.3",
@@ -19,13 +24,17 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@google/genai": "^2.24.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^26.6.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.1",
+    "dotenv": "^18.0.3",
     "fake-indexeddb": "^6.2.5",
+    "ffmpeg-static": "^5.3.0",
     "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^8.3.1",
     "vite-plugin-pwa": "^1.3.0",
