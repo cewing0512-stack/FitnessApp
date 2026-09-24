@@ -32,7 +32,8 @@ export function createVeoProvider(opts: VeoOptions): VideoProvider & ImageProvid
           aspectRatio: req.aspectRatio,
           durationSeconds: req.durationSec,
           ...(req.referenceImage ? {} : { negativePrompt: req.negativePrompt }),
-          personGeneration: opts.personGeneration,
+          // Text-to-video only accepts the default; allow_adult is required with reference images.
+          ...(req.referenceImage ? { personGeneration: opts.personGeneration } : {}),
           numberOfVideos: 1,
           ...(req.referenceImage
             ? {
