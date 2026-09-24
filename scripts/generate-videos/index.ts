@@ -168,10 +168,11 @@ async function generate() {
   }
 
   const provider = getProvider(env);
-  const referenceImage =
-    hasRef && provider.supportsReferenceImage
-      ? { bytes: await fsp.readFile(characterPath), mimeType: characterPath.endsWith('.jpg') ? 'image/jpeg' : 'image/png' }
-      : undefined;
+  const refBytes = hasRef && provider.supportsReferenceImage ? await fsp.readFile(characterPath) : undefined;
+  // Sniff the type: image models may return JPEG even though the file is named .png.
+  const referenceImage = refBytes
+    ? { bytes: refBytes, mimeType: refBytes[0] === 0xff && refBytes[1] === 0xd8 ? 'image/jpeg' : 'image/png' }
+    : undefined;
   await fsp.mkdir(PATHS.raw, { recursive: true });
 
   const failures: { id: string; error: string }[] = [];

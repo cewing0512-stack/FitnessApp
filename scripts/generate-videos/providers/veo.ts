@@ -1,4 +1,4 @@
-import { GoogleGenAI, PersonGeneration, VideoGenerationReferenceType } from '@google/genai';
+import { GoogleGenAI, VideoGenerationReferenceType } from '@google/genai';
 import type { ImageProvider, VideoProvider, VideoRequest } from './types';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -61,15 +61,20 @@ export function createVeoProvider(opts: VeoOptions): VideoProvider & ImageProvid
     },
 
     async generateImages(prompt: string, count: number) {
-      const res = await ai.models.generateImages({
-        model: opts.imageModel,
-        prompt,
-        config: { numberOfImages: count, aspectRatio: '9:16', personGeneration: PersonGeneration.ALLOW_ADULT },
-      });
-      return (res.generatedImages ?? [])
-        .map((g) => g.image)
-        .filter((img): img is NonNullable<typeof img> => !!img?.imageBytes)
-        .map((img) => ({ bytes: Buffer.from(img.imageBytes!, 'base64'), mimeType: img.mimeType ?? 'image/png' }));
+      // Gemini image models return one image per call, so request them in parallel.
+      const results = await Promise.all(
+        Array.from({ length: count }, () =>
+          ai.models.generateContent({
+            model: opts.imageModel,
+            contents: prompt,
+            config: { responseModalities: ['IMAGE'], imageConfig: { aspectRatio: '9:16' } },
+          }),
+        ),
+      );
+      return results
+        .flatMap((res) => res.candidates?.[0]?.content?.parts ?? [])
+        .filter((part) => !!part.inlineData?.data)
+        .map((part) => ({ bytes: Buffer.from(part.inlineData!.data!, 'base64'), mimeType: part.inlineData!.mimeType ?? 'image/png' }));
     },
   };
 }

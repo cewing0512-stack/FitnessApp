@@ -27,7 +27,7 @@ export const NEGATIVE_PROMPT =
 export const DEFAULTS = {
   provider: 'veo',
   veoModel: 'veo-3.1-fast-generate-preview',
-  imageModel: 'imagen-4.0-generate-001',
+  imageModel: 'gemini-3.1-flash-image',
   durationSec: 8,
   /** Approximate USD per second of generated video, only used for the cost estimate. */
   pricePerSec: 0.15,
