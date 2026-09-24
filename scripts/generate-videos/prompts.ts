@@ -40,7 +40,9 @@ export function buildPrompt(input: {
   const mat = floor ? ' A dark gray exercise mat lies on the floor.' : '';
   const reps = input.holdOrStretch
     ? 'She moves into the position slowly and holds it with steady breathing, making small natural movements.'
-    : 'She performs two or three smooth, controlled repetitions at a steady tempo with correct technique.';
+    : 'She performs two slow, controlled repetitions through the FULL range of motion described above, ' +
+      'with large, clearly visible movement: every repetition reaches the full end position before returning. ' +
+      'She is actively exercising the whole time, never standing still or making small partial movements.';
 
   return [
     'Vertical 9:16 fitness demonstration video, one continuous shot.',
@@ -51,6 +53,7 @@ export function buildPrompt(input: {
     `Movement: ${input.motion}`,
     `${reps} The clip begins and ends in the same starting position so it can loop seamlessly.`,
     `Form: ${input.cues.join('; ')}.`,
+    'If a reference photo is provided, use it only for her appearance and outfit, not for her pose.',
     STYLE,
   ].join('\n');
 }

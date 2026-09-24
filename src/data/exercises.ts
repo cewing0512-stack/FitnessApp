@@ -305,7 +305,7 @@ export const EXERCISES: Exercise[] = [
     mistakes: ['Heels lifting', 'Knees caving inward', 'Rounding the back at the bottom'],
     modification: 'Squat to a chair, or reduce the depth.',
     motion:
-      'Standing with feet slightly wider than hip-width and toes turned slightly out, she holds one dumbbell vertically against her chest with both hands. She sits her hips down and back into a deep squat with chest tall and knees tracking over toes, then drives through her feet to stand.',
+      'Standing with feet slightly wider than hip-width and toes turned slightly out, she holds one dumbbell vertically against her chest with both hands. She sits her hips down and back into a deep squat until her thighs are at least parallel to the floor, chest tall and knees tracking over toes, pauses briefly at the bottom, then drives through her feet to stand.',
   }),
   ex({
     id: 'sumo-squat',
