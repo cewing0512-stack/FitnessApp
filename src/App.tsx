@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Outlet, RouterProvider, ScrollRestoration, createBrowserRouter, useMatch } from 'react-router';
 import { TabBar } from './components/TabBar';
+import { UpdatePrompt } from './components/UpdatePrompt';
 import { ComingSoon } from './screens/ComingSoon';
 import { Complete } from './screens/Complete';
 import { History } from './screens/History';
@@ -22,6 +23,7 @@ function Root() {
     <>
       <Outlet />
       {!onWorkout && <TabBar />}
+      <UpdatePrompt />
       <ScrollRestoration />
     </>
   );

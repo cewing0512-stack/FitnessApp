@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { mediaFor } from '../data/media';
+import { cacheVideo } from '../player/offline';
 
 interface Props {
   id: string;
@@ -31,6 +32,7 @@ export function ExerciseMedia({ id, cues, color }: Props) {
         disablePictureInPicture
         poster={media.thumb}
         onError={() => setFailed(true)}
+        onPlaying={(e) => void cacheVideo(e.currentTarget.currentSrc)}
       >
         {media.webm && <source src={media.webm} type="video/webm" />}
         {media.mp4 && <source src={media.mp4} type="video/mp4" onError={() => setFailed(true)} />}

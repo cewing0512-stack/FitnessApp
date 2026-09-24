@@ -1,7 +1,8 @@
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { WORKOUTS } from '../data/library';
 import { workoutDurationSec } from '../engine/timeline';
 import { beep, speak, speechSupported, unlockAudio } from '../player/audio';
+import { allClips, cacheAllClips, countCachedClips } from '../player/offline';
 import { DEFAULT_SETTINGS } from '../state/settings';
 import { useApp } from '../state/store';
 
@@ -96,6 +97,8 @@ export function Settings() {
         </div>
       </Group>
 
+      <OfflineVideos />
+
       <button
         type="button"
         disabled={isDefault}
@@ -108,6 +111,47 @@ export function Settings() {
         Everything is stored on this device only. No account, no tracking.
       </p>
     </div>
+  );
+}
+
+function OfflineVideos() {
+  const total = allClips().length;
+  const [cached, setCached] = useState<number | null>(null);
+  const [progress, setProgress] = useState<[number, number] | null>(null);
+
+  useEffect(() => {
+    countCachedClips()
+      .then(setCached)
+      .catch(() => setCached(0));
+  }, []);
+
+  const saveAll = async () => {
+    setProgress([0, total]);
+    try {
+      setCached(await cacheAllClips((d, t) => setProgress([d, t])));
+    } finally {
+      setProgress(null);
+    }
+  };
+
+  const footer =
+    total === 0
+      ? 'No demo videos yet. Once clips are added to public/videos, you can save them here.'
+      : 'Clips are also saved automatically the first time they play. The app itself always works offline.';
+
+  return (
+    <Group title="Offline" footer={footer}>
+      <Row label="Demo videos" hint={total ? `${cached ?? '…'} of ${total} saved on this device` : 'None available yet'}>
+        <button
+          type="button"
+          disabled={total === 0 || progress !== null || cached === total}
+          onClick={() => void saveAll()}
+          className="h-11 shrink-0 rounded-full bg-surface-2 px-4 font-medium active:bg-white/15 disabled:opacity-40"
+        >
+          {progress ? `${progress[0]}/${progress[1]}` : cached === total && total > 0 ? 'All saved' : 'Save all'}
+        </button>
+      </Row>
+    </Group>
   );
 }
 

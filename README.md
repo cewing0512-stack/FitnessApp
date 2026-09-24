@@ -2,7 +2,7 @@
 
 A personal dumbbell workout **library** PWA. You browse and pick a workout yourself. The app never schedules anything.
 
-> Status: **Phases 1–3 of 5** are done: the library, the workout player, history and settings. PWA/offline and the video pipeline come next.
+> Status: **Phases 1–4 of 5** are done: the library, the workout player, history, settings, and an installable offline PWA. The AI video pipeline comes next.
 
 ## Develop
 
@@ -72,3 +72,40 @@ The timer is a pure state machine in `src/engine/timerMachine.ts`, fully unit te
 - **Music:** demo videos are always muted and the audio session is set to *ambient*, so your music or podcast keeps playing. On iPhone the silent switch also silences the cues.
 - **Screen stays on** during a workout via the Screen Wake Lock API. If you lock the phone anyway, the timer catches up when you unlock. Cues don't play while the screen is locked, because iOS suspends web pages.
 - **Settings are captured at the start:** changing work/rest time mid-workout applies to the next workout.
+
+## Offline and installable (PWA)
+
+- The app shell and all thumbnails are **precached on the first visit**, so the library, detail screens, player, history and settings all work in airplane mode.
+- Demo clips are **cached automatically the first time they play**. To grab them all at once, before a trip or a basement gym, use **Settings → Offline → Save all**.
+- When you deploy a new version, the app shows **"A new version is available"** with an Update button. It never reloads on its own and never shows up mid-workout.
+- Your data (favorites, history, settings) lives in IndexedDB on the device. It isn't synced anywhere. Deleting the home-screen app or clearing Safari website data erases it.
+
+## Deploy to Vercel (free)
+
+1. Push this repo to GitHub (it already is, if you're reading this there).
+2. Go to [vercel.com](https://vercel.com), sign in with GitHub, and click **Add New… → Project**.
+3. Pick this repository. Vercel detects **Vite** automatically, so keep the defaults:
+   - Build command: `npm run build`
+   - Output directory: `dist`
+4. Click **Deploy**. In about a minute you'll get a URL like `https://dumbbell-library.vercel.app`.
+5. From then on, every push to the production branch redeploys automatically. Other branches get their own preview URLs.
+
+`vercel.json` already handles routing for direct links like `/workout/heavy-arms`, and makes sure the service worker is never cached stale.
+
+> Want to use Netlify instead? Build command `npm run build`, publish directory `dist`, and add a `public/_redirects` file containing `/* /index.html 200`.
+
+## Add it to your home screen
+
+**iPhone (Safari)**
+1. Open your Vercel URL in **Safari**. Other iOS browsers can't install web apps on older iOS versions.
+2. Tap the **Share** button (square with an arrow), scroll down, and tap **Add to Home Screen**.
+3. Keep the name "Dumbbells" and tap **Add**.
+4. Open it from the home screen. It runs full screen, without Safari's toolbars.
+5. Open a workout once while online so its videos are cached, or use **Settings → Save all**.
+
+**Android (Chrome)**
+1. Open the URL in **Chrome**.
+2. Tap **⋮ → Add to Home screen** (or **Install app**). Chrome may also show an install banner.
+3. Confirm **Install**.
+
+Tip: on iPhone, cues follow the ring/silent switch. Keep ringer on to hear beeps and voice over your music.
