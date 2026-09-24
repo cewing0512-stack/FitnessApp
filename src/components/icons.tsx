@@ -84,3 +84,54 @@ export const SlidersIcon = (p: P) => (
     <circle cx="18" cy="18" r="2" />
   </svg>
 );
+export const XIcon = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M18 6L6 18M6 6l12 12" />
+  </svg>
+);
+export const PauseIcon = (p: P) => (
+  <svg {...base(p)} fill="currentColor" stroke="none">
+    <rect x="6" y="4.5" width="4" height="15" rx="1.2" />
+    <rect x="14" y="4.5" width="4" height="15" rx="1.2" />
+  </svg>
+);
+export const SkipForwardIcon = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M5 5.5v13l9.5-6.5z" fill="currentColor" />
+    <path d="M18.5 5v14" />
+  </svg>
+);
+export const SkipBackIcon = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M19 5.5v13l-9.5-6.5z" fill="currentColor" />
+    <path d="M5.5 5v14" />
+  </svg>
+);
+export const VolumeIcon = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M4 9.5v5h3.5L12 19V5L7.5 9.5z" fill="currentColor" />
+    <path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" />
+  </svg>
+);
+export const MuteIcon = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M4 9.5v5h3.5L12 19V5L7.5 9.5z" fill="currentColor" />
+    <path d="M16 9.5l5 5M21 9.5l-5 5" />
+  </svg>
+);
+export const CheckIcon = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M5 12.5l4.5 4.5L19 7.5" />
+  </svg>
+);
+export const TrashIcon = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" />
+  </svg>
+);
+export const InfoIcon = (p: P) => (
+  <svg {...base(p)}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 11v5M12 8h.01" />
+  </svg>
+);

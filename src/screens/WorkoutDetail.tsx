@@ -9,6 +9,7 @@ import { COOLDOWNS, MOVE_SEC, WARMUPS, getMove } from '../data/moves';
 import { CATEGORY_LABELS, type Workout, type WorkoutItem } from '../data/types';
 import { repGuidance, resolveWeight } from '../data/weights';
 import { formatMinutes } from '../engine/timeline';
+import { unlockAudio } from '../player/audio';
 import { useApp } from '../state/store';
 
 export function WorkoutDetail() {
@@ -121,6 +122,8 @@ export function WorkoutDetail() {
       <div className="fixed inset-x-0 bottom-0 z-30 bg-gradient-to-t from-ink via-ink/95 to-transparent px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-8">
         <Link
           to={`/workout/${w.id}/play`}
+          state={{ autostart: true }}
+          onClick={unlockAudio}
           className="mx-auto flex h-16 max-w-xl items-center justify-center gap-3 rounded-2xl bg-work text-xl font-semibold text-ink shadow-[0_8px_30px_-8px] shadow-work/50 transition-transform active:scale-[0.98]"
         >
           <PlayIcon className="size-6" />

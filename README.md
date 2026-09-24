@@ -2,7 +2,7 @@
 
 A personal dumbbell workout **library** PWA. You browse and pick a workout yourself. The app never schedules anything.
 
-> Status: **Phases 1–2 of 5** are done: the data model, seeded library, and Library + Workout Detail screens. The player, PWA and video pipeline come next.
+> Status: **Phases 1–3 of 5** are done: the library, the workout player, history and settings. PWA/offline and the video pipeline come next.
 
 ## Develop
 
@@ -61,3 +61,14 @@ Drop files into `public/videos/` named after an exercise or move id:
 - `{id}.jpg` for the thumbnail and poster
 
 The app detects them automatically through a small Vite plugin (`vite/media-index.ts`). Until a file exists, the app shows a clean placeholder, so it's fully usable without any videos.
+
+## The player
+
+The timer is a pure state machine in `src/engine/timerMachine.ts`, fully unit tested. It stores the wall-clock time each segment ends rather than counting ticks, so it never drifts. If the phone throttles or suspends the page, it catches up exactly when you come back.
+
+- **Controls:** tap the ring to pause or resume. Back restarts the current block if you're more than 3s in, otherwise it goes to the previous one. Skip moves to the next block. During the warm-up there's a "Skip warm-up" button. ✕ ends the workout, after a confirmation.
+- **Completed exercises:** a block counts as done if you did at least half of it. Workouts with at least one completed block are saved to History.
+- **Audio:** 3-2-1 beeps plus spoken cues ("Rest. Next up: Goblet Squat, 20 to 30 pounds.", "Switch sides.") via Web Audio and the Web Speech API. Toggle them in Settings, or tap the speaker in the player to mute.
+- **Music:** demo videos are always muted and the audio session is set to *ambient*, so your music or podcast keeps playing. On iPhone the silent switch also silences the cues.
+- **Screen stays on** during a workout via the Screen Wake Lock API. If you lock the phone anyway, the timer catches up when you unlock. Cues don't play while the screen is locked, because iOS suspends web pages.
+- **Settings are captured at the start:** changing work/rest time mid-workout applies to the next workout.

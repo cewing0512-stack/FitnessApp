@@ -10,12 +10,15 @@ interface AppState {
   favorites: ReadonlySet<string>;
   /** Library filters live in memory so they survive navigating to a workout and back. */
   filters: LibraryFilters;
+  /** Player mute toggle. Session only; the sound/voice defaults live in settings. */
+  muted: boolean;
 
   hydrate: () => Promise<void>;
   toggleFavorite: (workoutId: string) => void;
   updateSettings: (patch: Partial<Settings>) => void;
   setFilters: (patch: Partial<LibraryFilters>) => void;
   resetFilters: () => void;
+  setMuted: (muted: boolean) => void;
 }
 
 const persist = (key: string, value: unknown) => {
@@ -27,6 +30,7 @@ export const useApp = create<AppState>((set, get) => ({
   settings: DEFAULT_SETTINGS,
   favorites: new Set(),
   filters: DEFAULT_FILTERS,
+  muted: false,
 
   hydrate: async () => {
     try {
@@ -58,4 +62,5 @@ export const useApp = create<AppState>((set, get) => ({
 
   setFilters: (patch) => set({ filters: { ...get().filters, ...patch } }),
   resetFilters: () => set({ filters: DEFAULT_FILTERS }),
+  setMuted: (muted) => set({ muted }),
 }));
