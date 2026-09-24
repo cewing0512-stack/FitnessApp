@@ -9,7 +9,7 @@
  *   npm run videos                         Generate every missing exercise clip
  *   npm run videos:import                  Compress clips you made by hand (from ./inbox)
  *
- * Common flags for `videos`: --dry-run, --include-moves, --force, --limit N,
+ * Common flags for `videos`: --dry-run, --include-moves, --force, --use-reference, --limit N,
  * --only a,b,c, --duration 8, --concurrency 2, --webm, --no-loop, --yes
  */
 import dotenv from 'dotenv';
@@ -29,6 +29,7 @@ const { positionals, values: args } = parseArgs({
     only: { type: 'string' },
     'include-moves': { type: 'boolean', default: false },
     force: { type: 'boolean', default: false },
+    'use-reference': { type: 'boolean', default: false },
     'dry-run': { type: 'boolean', default: false },
     limit: { type: 'string' },
     duration: { type: 'string' },
@@ -142,9 +143,11 @@ async function generate() {
   specs = specs.filter((s) => !skipped.includes(s));
   if (args.limit) specs = specs.slice(0, Number(args.limit));
 
-  const hasRef = exists(characterPath);
+  // Off by default: with Veo, the standing reference photo anchors her pose and the reps become tiny.
+  const useRef = args['use-reference'] || env.USE_CHARACTER_REFERENCE === 'true';
+  const hasRef = useRef && exists(characterPath);
   console.log(`Provider: ${env.VIDEO_PROVIDER || DEFAULTS.provider} (${env.VEO_MODEL || DEFAULTS.veoModel})`);
-  console.log(`Character reference: ${hasRef ? characterPath : 'none (text description only)'}`);
+  console.log(`Character reference: ${hasRef ? characterPath : 'off (text description only; --use-reference to send character.png)'}`);
   console.log(`Clips to generate: ${specs.length}${skipped.length ? ` (${skipped.length} already exist, use --force to redo)` : ''}`);
   console.log(`Length: ${duration}s each, vertical 9:16`);
   console.log(
@@ -158,7 +161,7 @@ async function generate() {
     console.log(`\nNegative prompt: ${NEGATIVE_PROMPT}\n\nDry run: nothing was generated.`);
     return;
   }
-  if (!hasRef) console.warn('\n⚠ No character.png. The person may look different in each clip. Run npm run videos:character first.');
+  if (useRef && !hasRef) console.warn('\n⚠ No character.png. The person may look different in each clip. Run npm run videos:character first.');
   if (!args.yes) {
     if (!process.stdin.isTTY) throw new Error('Add --yes to confirm spending (non-interactive shell).');
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });

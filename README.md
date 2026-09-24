@@ -71,14 +71,14 @@ Commands:
 
 ```bash
 npm run videos:character                  # 4 candidate photos of the character → pick one:
-npm run videos:character -- --pick 2      # saves it as scripts/generate-videos/character.png
+npm run videos:character -- --pick 2      # saves it as scripts/generate-videos/character.png (style reference)
 npm run videos -- --only goblet-squat     # ONE test clip (~$1.20). Check it before doing the rest
 npm run videos                            # every missing exercise clip (asks before spending)
 npm run videos -- --include-moves         # also the warm-up and stretch moves
 npm run videos:status                     # what's done / missing
 ```
 
-- **Consistency:** every prompt shares the same character, outfit, studio and camera rules (`scripts/generate-videos/config.ts`), plus that exercise's motion description and form cues. When `character.png` exists, it's also sent to Veo as a reference image.
+- **Consistency:** every prompt shares the same character, outfit, studio and camera rules (`scripts/generate-videos/config.ts`), plus that exercise's motion description and form cues. `character.png` is **not** sent to Veo by default: in testing, the standing reference photo anchored her pose and the reps shrank to tiny knee bends. Add `--use-reference` (or `USE_CHARACTER_REFERENCE=true`) to send it anyway, for a more identical face at the cost of weaker movement.
 - **Cost:** the script prints an estimate and asks for confirmation before generating. It uses about $0.15 per second on Veo 3.1 Fast (≈ $1.20 per 8s clip, ≈ $48 for all 40 exercises). Pricing changes, so check Google's pricing page. Set `VEO_MODEL=veo-3.1-generate-preview` for higher quality at a higher price.
 - **Retries:** existing clips are skipped, so if some fail, re-run the same command. Use `--force` to redo a clip you don't like.
 - **Output:** each clip is cropped to 720×1280, audio is removed, and it's compressed to H.264 with fast-start (usually well under 1 MB). The end cross-fades into the start so the loop has no visible jump (`--no-loop` to disable), and a thumbnail is taken from the first frame. Add `--webm` to also write a VP9 WebM.
