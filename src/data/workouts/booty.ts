@@ -1,0 +1,50 @@
+import type { Workout } from '../types';
+import { items } from './helpers';
+
+export const BOOTY: Workout[] = [
+  {
+    id: 'glute-burn-circuit',
+    name: 'Glute Burn Circuit',
+    category: 'booty',
+    format: 'circuit',
+    intensity: 'standard',
+    description: 'Bridges, squats and lunges aimed at your glutes.',
+    rounds: 3,
+    items: items('glute-bridge', 'sumo-squat', 'curtsy-lunge', 'single-leg-glute-bridge', 'reverse-lunge'),
+    warmup: 'lower',
+    cooldown: 'lower',
+  },
+  {
+    id: 'booty-sculpt-ladder',
+    name: 'Booty Sculpt Ladder',
+    category: 'booty',
+    format: 'circuit',
+    intensity: 'standard',
+    description: 'Eight glute moves, two rounds, hinges and bridges included.',
+    rounds: 2,
+    items: items(
+      'romanian-deadlift',
+      'glute-bridge',
+      'curtsy-lunge',
+      'sumo-squat',
+      'single-leg-rdl',
+      'lateral-lunge',
+      'single-leg-glute-bridge',
+      'dumbbell-swing',
+    ),
+    warmup: 'lower',
+    cooldown: 'lower',
+  },
+  {
+    id: 'heavy-glutes',
+    name: 'Heavy Glutes',
+    category: 'booty',
+    format: 'circuit',
+    intensity: 'heavy',
+    description: 'Heavy hinges and bridges for strength. Squeeze every rep.',
+    rounds: 3,
+    items: items('romanian-deadlift', 'glute-bridge', 'sumo-squat', 'split-squat', 'dumbbell-swing'),
+    warmup: 'lower',
+    cooldown: 'lower',
+  },
+];
