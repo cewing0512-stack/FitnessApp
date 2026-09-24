@@ -13,3 +13,4 @@ scripts/generate-videos/.raw/
 scripts/generate-videos/inbox/*
 !scripts/generate-videos/inbox/.gitkeep
 scripts/generate-videos/character-options/
+scripts/generate-videos/start-frames/

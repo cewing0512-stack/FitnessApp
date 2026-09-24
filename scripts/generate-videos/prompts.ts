@@ -8,6 +8,8 @@ export interface ClipSpec {
   name: string;
   kind: 'exercise' | 'warmup' | 'cooldown';
   prompt: string;
+  /** Image prompt for the first frame: her in the starting position, edited from character.png. */
+  startFramePrompt: string;
 }
 
 const FLOOR_WORDS = /\b(lying|lies|on her back|face down|plank|seated|kneeling|half-kneeling|hands and knees|on a mat)\b/i;
@@ -27,17 +29,23 @@ function equipmentLine(equipment: Equipment | 'none'): string {
  * Builds the full text prompt for one clip: the shared character, setting and
  * camera rules, plus the exercise-specific motion and form cues.
  */
+function framing(motion: string) {
+  const floor = FLOOR_WORDS.test(motion);
+  return {
+    camera: floor
+      ? 'Locked-off static camera, slightly elevated side view, framed so her entire body on the mat is visible with margin on all sides.'
+      : 'Locked-off static camera at hip height, facing her at a slight three-quarter angle, her entire body visible from head to feet with space above her head and below her feet.',
+    mat: floor ? ' A dark gray exercise mat lies on the floor.' : '',
+  };
+}
+
 export function buildPrompt(input: {
   motion: string;
   cues: string[];
   equipment: Equipment | 'none';
   holdOrStretch?: boolean;
 }): string {
-  const floor = FLOOR_WORDS.test(input.motion);
-  const camera = floor
-    ? 'Locked-off static camera, slightly elevated side view, framed so her entire body on the mat is visible with margin on all sides.'
-    : 'Locked-off static camera at hip height, facing her at a slight three-quarter angle, her entire body visible from head to feet with space above her head and below her feet.';
-  const mat = floor ? ' A dark gray exercise mat lies on the floor.' : '';
+  const { camera, mat } = framing(input.motion);
   const reps = input.holdOrStretch
     ? 'She moves into the position slowly and holds it with steady breathing, making small natural movements.'
     : 'She performs two slow, controlled repetitions through the FULL range of motion described above, ' +
@@ -58,6 +66,23 @@ export function buildPrompt(input: {
   ].join('\n');
 }
 
+/**
+ * Image prompt for a clip's first frame. It is sent together with character.png, so the
+ * same woman appears in every clip while each clip starts from its own exercise pose.
+ */
+export function buildStartFramePrompt(input: { motion: string; equipment: Equipment | 'none' }): string {
+  const { camera, mat } = framing(input.motion);
+  return [
+    'Using the woman in the attached photo (same face, hair, body and outfit), create a new vertical 9:16 photo',
+    'of her frozen in the STARTING POSITION of this exercise, just before the first repetition begins:',
+    `${input.motion}`,
+    equipmentLine(input.equipment),
+    `Camera: ${camera.replace('Locked-off static camera', 'camera')}`,
+    `Setting: ${SETTING}.${mat}`,
+    'Photorealistic, sharp focus, natural proportions, realistic hands gripping the equipment. No text, no logos.',
+  ].join('\n');
+}
+
 const HOLD_IDS = new Set(['side-plank']);
 
 export function allClipSpecs(opts: { includeMoves: boolean }): ClipSpec[] {
@@ -66,6 +91,7 @@ export function allClipSpecs(opts: { includeMoves: boolean }): ClipSpec[] {
     name: e.name,
     kind: 'exercise',
     prompt: buildPrompt({ motion: e.motion, cues: e.cues, equipment: e.equipment, holdOrStretch: HOLD_IDS.has(e.id) }),
+    startFramePrompt: buildStartFramePrompt({ motion: e.motion, equipment: e.equipment }),
   }));
   if (!opts.includeMoves) return exercises;
   const moves: ClipSpec[] = MOVES.map((m) => ({
@@ -73,6 +99,7 @@ export function allClipSpecs(opts: { includeMoves: boolean }): ClipSpec[] {
     name: m.name,
     kind: m.kind,
     prompt: buildPrompt({ motion: m.motion, cues: m.cues, equipment: 'none', holdOrStretch: m.kind === 'cooldown' }),
+    startFramePrompt: buildStartFramePrompt({ motion: m.motion, equipment: 'none' }),
   }));
   return [...exercises, ...moves];
 }

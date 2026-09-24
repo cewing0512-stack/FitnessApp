@@ -16,14 +16,24 @@ export interface VideoRequest {
   /** Always '9:16' for this app. */
   aspectRatio: '9:16';
   durationSec: number;
-  /** Photo of the character, if one exists. */
-  referenceImage?: { bytes: Buffer; mimeType: string };
+  /** Photo of the character, sent as a style reference (--use-reference). */
+  referenceImage?: Image;
+  /** Still of her in the exercise's starting position, used as the video's first frame. */
+  startFrame?: Image;
   /** Where to write the downloaded (uncompressed) video file. */
   outPath: string;
   log: (msg: string) => void;
 }
 
+export interface Image {
+  bytes: Buffer;
+  mimeType: string;
+}
+
 export interface ImageProvider {
-  /** Generates `count` still images and returns their bytes (PNG/JPEG). */
-  generateImages(prompt: string, count: number): Promise<{ bytes: Buffer; mimeType: string }[]>;
+  /**
+   * Generates `count` still images and returns their bytes (PNG/JPEG).
+   * `reference` is a photo of the character to keep her looking the same.
+   */
+  generateImages(prompt: string, count: number, reference?: Image): Promise<Image[]>;
 }

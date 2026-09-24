@@ -1,5 +1,5 @@
 import { GoogleGenAI, VideoGenerationReferenceType } from '@google/genai';
-import type { ImageProvider, VideoProvider, VideoRequest } from './types';
+import type { Image, ImageProvider, VideoProvider, VideoRequest } from './types';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -28,12 +28,13 @@ export function createVeoProvider(opts: VeoOptions): VideoProvider & ImageProvid
       let op = await ai.models.generateVideos({
         model: opts.model,
         prompt,
+        ...(req.startFrame ? { image: { imageBytes: req.startFrame.bytes.toString('base64'), mimeType: req.startFrame.mimeType } } : {}),
         config: {
           aspectRatio: req.aspectRatio,
           durationSeconds: req.durationSec,
           ...(req.referenceImage ? {} : { negativePrompt: req.negativePrompt }),
-          // Text-to-video only accepts the default; allow_adult is required with reference images.
-          ...(req.referenceImage ? { personGeneration: opts.personGeneration } : {}),
+          // Text-to-video only accepts the default; allow_adult is required when an image is sent.
+          ...(req.referenceImage || req.startFrame ? { personGeneration: opts.personGeneration } : {}),
           numberOfVideos: 1,
           ...(req.referenceImage
             ? {
@@ -63,13 +64,15 @@ export function createVeoProvider(opts: VeoOptions): VideoProvider & ImageProvid
       await ai.files.download({ file: video, downloadPath: req.outPath });
     },
 
-    async generateImages(prompt: string, count: number) {
+    async generateImages(prompt: string, count: number, reference?: Image) {
       // Gemini image models return one image per call, so request them in parallel.
       const results = await Promise.all(
         Array.from({ length: count }, () =>
           ai.models.generateContent({
             model: opts.imageModel,
-            contents: prompt,
+            contents: reference
+              ? [{ inlineData: { data: reference.bytes.toString('base64'), mimeType: reference.mimeType } }, { text: prompt }]
+              : prompt,
             config: { responseModalities: ['IMAGE'], imageConfig: { aspectRatio: '9:16' } },
           }),
         ),

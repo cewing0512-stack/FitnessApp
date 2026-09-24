@@ -5,11 +5,13 @@
  *   npm run videos:status                  Which clips exist / are missing
  *   npm run videos:character               Generate 4 candidate character photos to pick from
  *   npm run videos:character -- --pick 2   Use candidate #2 as the reference image
+ *   npm run videos:frames -- --only a,b    Only make the start-frame stills, to check them first
  *   npm run videos -- --only goblet-squat  Generate one clip (good first test)
  *   npm run videos                         Generate every missing exercise clip
  *   npm run videos:import                  Compress clips you made by hand (from ./inbox)
  *
- * Common flags for `videos`: --dry-run, --include-moves, --force, --use-reference, --limit N,
+ * Common flags for `videos`: --dry-run, --include-moves, --force, --new-frame, --no-start-frame,
+ * --use-reference, --limit N,
  * --only a,b,c, --duration 8, --concurrency 2, --webm, --no-loop, --yes
  */
 import dotenv from 'dotenv';
@@ -22,6 +24,7 @@ import { compressClip } from './compress';
 import { DEFAULTS, NEGATIVE_PROMPT, PATHS } from './config';
 import { allClipSpecs, characterImagePrompt, renderPromptsMarkdown, type ClipSpec } from './prompts';
 import { getProvider } from './providers';
+import type { Image } from './providers/types';
 
 const { positionals, values: args } = parseArgs({
   allowPositionals: true,
@@ -30,6 +33,8 @@ const { positionals, values: args } = parseArgs({
     'include-moves': { type: 'boolean', default: false },
     force: { type: 'boolean', default: false },
     'use-reference': { type: 'boolean', default: false },
+    'no-start-frame': { type: 'boolean', default: false },
+    'new-frame': { type: 'boolean', default: false },
     'dry-run': { type: 'boolean', default: false },
     limit: { type: 'string' },
     duration: { type: 'string' },
@@ -50,6 +55,13 @@ const outFile = (id: string, ext: string) => path.join(PATHS.output, `${id}.${ex
 const fmtMB = (b: number) => `${(b / 1024 / 1024).toFixed(2)} MB`;
 const characterPath = env.CHARACTER_IMAGE || DEFAULTS.characterImage;
 const OPTIONS_DIR = 'scripts/generate-videos/character-options';
+const frameFile = (id: string) => path.join(PATHS.startFrames, `${id}.jpg`);
+
+/** Reads an image, sniffing the type: image models may return JPEG even when the file is named .png. */
+async function readImage(p: string): Promise<Image> {
+  const bytes = await fsp.readFile(p);
+  return { bytes, mimeType: bytes[0] === 0xff && bytes[1] === 0xd8 ? 'image/jpeg' : 'image/png' };
+}
 
 async function main() {
   switch (command) {
@@ -63,8 +75,10 @@ async function main() {
       return importInbox();
     case 'generate':
       return generate();
+    case 'frames':
+      return frames();
     default:
-      throw new Error(`Unknown command "${command}". Use: generate | prompts | status | character | import`);
+      throw new Error(`Unknown command "${command}". Use: generate | frames | prompts | status | character | import`);
   }
 }
 
@@ -127,32 +141,76 @@ async function importInbox() {
   }
 }
 
-async function generate() {
+function selectSpecs(): ClipSpec[] {
   const only = args.only?.split(',').map((s) => s.trim()).filter(Boolean);
+  const specs = allClipSpecs({ includeMoves: args['include-moves'] || !!only });
+  if (!only) return specs;
+  const unknown = only.filter((id) => !specs.some((s) => s.id === id));
+  if (unknown.length) throw new Error(`Unknown id(s): ${unknown.join(', ')}. See npm run videos:status.`);
+  return specs.filter((s) => only.includes(s.id));
+}
+
+/** Makes the start-frame still for one clip from character.png, unless it already exists. */
+async function ensureStartFrame(spec: ClipSpec, character: Image, redo: boolean): Promise<Image> {
+  const file = frameFile(spec.id);
+  if (redo || !exists(file)) {
+    const provider = getProvider(env);
+    if (!provider.generateImages) throw new Error(`Provider ${provider.name} cannot generate images.`);
+    const [img] = await provider.generateImages(spec.startFramePrompt, 1, character);
+    if (!img) throw new Error('The image model returned no start frame. Try again.');
+    await fsp.mkdir(PATHS.startFrames, { recursive: true });
+    await fsp.writeFile(file, img.bytes);
+  }
+  return readImage(file);
+}
+
+async function frames() {
+  if (!exists(characterPath)) throw new Error(`${characterPath} not found. Run npm run videos:character first.`);
+  const character = await readImage(characterPath);
+  const specs = selectSpecs();
+  console.log(`Making ${specs.length} start frames (~$${(specs.length * DEFAULTS.pricePerImage).toFixed(2)})…`);
+  await Promise.all(
+    specs.map(async (s) => {
+      try {
+        await ensureStartFrame(s, character, args.force);
+        console.log(`  [${s.id}] ✓ ${frameFile(s.id)}`);
+      } catch (e) {
+        console.log(`  [${s.id}] ✗ ${e instanceof Error ? e.message : e}`);
+        process.exitCode = 1;
+      }
+    }),
+  );
+}
+
+async function generate() {
   const duration = Number(args.duration ?? env.VIDEO_DURATION_SEC ?? DEFAULTS.durationSec);
   const concurrency = Math.max(1, Number(args.concurrency ?? DEFAULTS.concurrency));
   const pricePerSec = Number(env.VIDEO_PRICE_PER_SEC ?? DEFAULTS.pricePerSec);
 
-  let specs = allClipSpecs({ includeMoves: args['include-moves'] || !!only });
-  if (only) {
-    const unknown = only.filter((id) => !specs.some((s) => s.id === id));
-    if (unknown.length) throw new Error(`Unknown id(s): ${unknown.join(', ')}. See npm run videos:status.`);
-    specs = specs.filter((s) => only.includes(s.id));
-  }
+  let specs = selectSpecs();
   const skipped = specs.filter((s) => !args.force && exists(outFile(s.id, 'mp4')));
   specs = specs.filter((s) => !skipped.includes(s));
   if (args.limit) specs = specs.slice(0, Number(args.limit));
 
-  // Off by default: with Veo, the standing reference photo anchors her pose and the reps become tiny.
-  const useRef = args['use-reference'] || env.USE_CHARACTER_REFERENCE === 'true';
-  const hasRef = useRef && exists(characterPath);
-  console.log(`Provider: ${env.VIDEO_PROVIDER || DEFAULTS.provider} (${env.VEO_MODEL || DEFAULTS.veoModel})`);
-  console.log(`Character reference: ${hasRef ? characterPath : 'off (text description only; --use-reference to send character.png)'}`);
+  const provider = getProvider(env);
+  const hasCharacter = exists(characterPath);
+  // How the same woman is kept in every clip:
+  //  - start frame (default): character.png is turned into a still of her starting pose, which Veo animates.
+  //  - reference (--use-reference): character.png is sent as a style reference. Keeps her face, but the
+  //    standing photo anchors her pose, so the reps become tiny.
+  //  - text: description only. Good movement, but a different-looking woman in every clip.
+  const useRef = hasCharacter && (args['use-reference'] || env.USE_CHARACTER_REFERENCE === 'true');
+  const useStartFrame = hasCharacter && !useRef && !args['no-start-frame'] && !!provider.generateImages;
+  const mode = useStartFrame ? `start frame from ${characterPath}` : useRef ? `reference image ${characterPath}` : 'text description only';
+  const newFrames = useStartFrame ? specs.filter((s) => args['new-frame'] || !exists(frameFile(s.id))).length : 0;
+  const cost = specs.length * duration * pricePerSec + newFrames * DEFAULTS.pricePerImage;
+  console.log(`Provider: ${provider.name} (${env.VEO_MODEL || DEFAULTS.veoModel})`);
+  console.log(`Character: ${mode}`);
   console.log(`Clips to generate: ${specs.length}${skipped.length ? ` (${skipped.length} already exist, use --force to redo)` : ''}`);
   console.log(`Length: ${duration}s each, vertical 9:16`);
   console.log(
-    `Estimated cost: ~$${(specs.length * duration * pricePerSec).toFixed(2)} ` +
-      `(${specs.length} × ${duration}s × $${pricePerSec}/s, approximate; check Google's pricing page)`,
+    `Estimated cost: ~$${cost.toFixed(2)} (${specs.length} × ${duration}s × $${pricePerSec}/s` +
+      `${newFrames ? ` + ${newFrames} start frames × $${DEFAULTS.pricePerImage}` : ''}, approximate; check Google's pricing page)`,
   );
   if (!specs.length) return;
 
@@ -161,7 +219,7 @@ async function generate() {
     console.log(`\nNegative prompt: ${NEGATIVE_PROMPT}\n\nDry run: nothing was generated.`);
     return;
   }
-  if (useRef && !hasRef) console.warn('\n⚠ No character.png. The person may look different in each clip. Run npm run videos:character first.');
+  if (!hasCharacter) console.warn('\n⚠ No character.png. The person will look different in each clip. Run npm run videos:character first.');
   if (!args.yes) {
     if (!process.stdin.isTTY) throw new Error('Add --yes to confirm spending (non-interactive shell).');
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -170,17 +228,13 @@ async function generate() {
     if (!/^y(es)?$/i.test(answer.trim())) return console.log('Cancelled.');
   }
 
-  const provider = getProvider(env);
-  const refBytes = hasRef && provider.supportsReferenceImage ? await fsp.readFile(characterPath) : undefined;
-  // Sniff the type: image models may return JPEG even though the file is named .png.
-  const referenceImage = refBytes
-    ? { bytes: refBytes, mimeType: refBytes[0] === 0xff && refBytes[1] === 0xd8 ? 'image/jpeg' : 'image/png' }
-    : undefined;
+  const character = hasCharacter ? await readImage(characterPath) : undefined;
+  const referenceImage = useRef && provider.supportsReferenceImage ? character : undefined;
   await fsp.mkdir(PATHS.raw, { recursive: true });
 
   const failures: { id: string; error: string }[] = [];
   let next = 0;
-  // A quota error means every later request will fail too, so stop starting new clips.
+  // A quota or billing error means every later request will fail too, so stop starting new clips.
   let quotaHit = false;
   const worker = async () => {
     while (next < specs.length && !quotaHit) {
@@ -189,6 +243,7 @@ async function generate() {
       const raw = path.join(PATHS.raw, `${s.id}.mp4`);
       try {
         if (args.force || !exists(raw)) {
+          const startFrame = useStartFrame ? await ensureStartFrame(s, character!, args['new-frame']) : undefined;
           log('generating…');
           await provider.generate({
             id: s.id,
@@ -197,6 +252,7 @@ async function generate() {
             aspectRatio: '9:16',
             durationSec: duration,
             ...(referenceImage ? { referenceImage } : {}),
+            ...(startFrame ? { startFrame } : {}),
             outPath: raw,
             log,
           });
@@ -209,7 +265,7 @@ async function generate() {
         const error = e instanceof Error ? e.message : String(e);
         failures.push({ id: s.id, error });
         log(`✗ ${error}`);
-        if (/RESOURCE_EXHAUSTED|"code":429/.test(error)) quotaHit = true;
+        if (/RESOURCE_EXHAUSTED|"code":(429|402)/.test(error)) quotaHit = true;
       }
     }
   };
@@ -219,8 +275,8 @@ async function generate() {
   console.log(`\nFinished: ${next - failures.length}/${specs.length} clips.`);
   if (quotaHit) {
     console.log(
-      `Stopped: the API quota is used up (${notStarted} clips not started). ` +
-        'Check https://ai.dev/rate-limit, then re-run the same command later to continue.',
+      `Stopped: the API quota or prepaid credit is used up (${notStarted} clips not started). ` +
+        'Check billing and limits in AI Studio (https://ai.dev/rate-limit), then re-run the same command to continue.',
     );
   }
   if (failures.length) {

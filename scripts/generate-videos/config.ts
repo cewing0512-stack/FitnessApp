@@ -31,6 +31,8 @@ export const DEFAULTS = {
   durationSec: 8,
   /** Approximate USD per second of generated video, only used for the cost estimate. */
   pricePerSec: 0.15,
+  /** Approximate USD per start-frame image, only used for the cost estimate. */
+  pricePerImage: 0.04,
   concurrency: 2,
   characterImage: 'scripts/generate-videos/character.png',
 };
@@ -40,6 +42,8 @@ export const PATHS = {
   output: 'public/videos',
   /** Untouched downloads from the provider (git-ignored). */
   raw: 'scripts/generate-videos/.raw',
+  /** First-frame stills of the character in each starting position (git-ignored, cheap to remake). */
+  startFrames: 'scripts/generate-videos/start-frames',
   /** Drop manually made clips here as {id}.mp4, then run `npm run videos:import`. */
   inbox: 'scripts/generate-videos/inbox',
   promptsMd: 'prompts.md',

@@ -45,6 +45,15 @@ describe('video prompts', () => {
     expect(specs.find((s) => s.id === 'push-up')!.prompt).toContain('She uses no equipment.');
   });
 
+  it('asks for each clip\'s start frame in that exercise\'s starting position', () => {
+    const goblet = EXERCISES.find((e) => e.id === 'goblet-squat')!;
+    const frame = specs.find((s) => s.id === 'goblet-squat')!.startFramePrompt;
+    expect(frame).toContain('STARTING POSITION');
+    expect(frame).toContain(goblet.motion);
+    expect(frame).toContain(SETTING);
+    expect(specs.find((s) => s.id === 'floor-press')!.startFramePrompt).toContain('exercise mat');
+  });
+
   it('prompts.md is up to date (run `npm run videos:prompts` if this fails)', () => {
     expect(fs.readFileSync('prompts.md', 'utf8')).toBe(renderPromptsMarkdown());
   });

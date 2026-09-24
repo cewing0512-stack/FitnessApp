@@ -12,6 +12,7 @@
     "typecheck": "tsc -b",
     "videos": "tsx scripts/generate-videos/index.ts generate",
     "videos:prompts": "tsx scripts/generate-videos/index.ts prompts",
+    "videos:frames": "tsx scripts/generate-videos/index.ts frames",
     "videos:status": "tsx scripts/generate-videos/index.ts status",
     "videos:character": "tsx scripts/generate-videos/index.ts character",
     "videos:import": "tsx scripts/generate-videos/index.ts import"
