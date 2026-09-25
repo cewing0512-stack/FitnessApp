@@ -18,6 +18,7 @@ export function getProvider(env: NodeJS.ProcessEnv): VideoProvider & Partial<Ima
         model: env.VEO_MODEL || DEFAULTS.veoModel,
         imageModel: env.IMAGE_MODEL || DEFAULTS.imageModel,
         personGeneration: env.VEO_PERSON_GENERATION || 'allow_adult',
+        referenceMode: env.VEO_REFERENCE_MODE === 'first-frame' ? 'first-frame' : 'asset',
       });
     }
     case 'mock':

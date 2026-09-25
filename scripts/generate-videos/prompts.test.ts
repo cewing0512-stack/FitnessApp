@@ -26,7 +26,7 @@ describe('video prompts', () => {
     const goblet = EXERCISES.find((e) => e.id === 'goblet-squat')!;
     const p = specs.find((s) => s.id === 'goblet-squat')!.prompt;
     expect(p).toContain(goblet.motion);
-    for (const cue of goblet.cues) expect(p).toContain(cue);
+    for (const cue of goblet.cues) expect(p.toLowerCase()).toContain(cue.toLowerCase());
     expect(p).toContain('single black hexagonal rubber dumbbell');
   });
 

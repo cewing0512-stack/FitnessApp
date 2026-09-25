@@ -16,7 +16,9 @@ export const SETTING =
 
 export const STYLE =
   'Photorealistic, natural body proportions, realistic hands firmly gripping the equipment, sharp focus, ' +
-  'smooth natural motion, no music, no text, no captions, no logos, no on-screen graphics.';
+  'smooth natural motion, no text, no captions, no logos, no on-screen graphics. ' +
+  'She never talks: her mouth stays gently closed the whole time and she is silently focused on the movement. ' +
+  'There is no dialogue, no narration, no voiceover and no music.';
 
 export const NEGATIVE_PROMPT =
   'text, captions, subtitles, watermark, logo, multiple people, extra limbs, extra fingers, distorted hands, ' +

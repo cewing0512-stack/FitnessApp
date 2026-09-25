@@ -50,7 +50,9 @@ export function buildPrompt(input: {
     equipmentLine(input.equipment),
     `Movement: ${input.motion}`,
     `${reps} The clip begins and ends in the same starting position so it can loop seamlessly.`,
-    `Form: ${input.cues.join('; ')}.`,
+    // Form cues are written as spoken coaching ("Sit your hips back"), which Veo's audio
+    // model tries to voice and then refuses, so they're phrased as a description instead.
+    `Her form is precise: ${input.cues.map((c) => c.charAt(0).toLowerCase() + c.slice(1)).join('; ')}.`,
     STYLE,
   ].join('\n');
 }

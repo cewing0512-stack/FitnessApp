@@ -25,6 +25,11 @@ interface VeoOptions {
   imageModel: string;
   /** 'allow_adult' is required to generate people. */
   personGeneration: string;
+  /**
+   * How the character photo is used: 'asset' sends it as a reference image;
+   * 'first-frame' starts the clip from the photo (image-to-video).
+   */
+  referenceMode: 'asset' | 'first-frame';
   pollMs?: number;
 }
 
@@ -40,30 +45,28 @@ export function createVeoProvider(opts: VeoOptions): VideoProvider & ImageProvid
 
     async generate(req: VideoRequest) {
       const started = Date.now();
-      // Veo rejects a separate negative prompt when a reference image is attached,
-      // so in that case the "avoid" list goes into the prompt text instead.
-      const prompt = req.referenceImage ? `${req.prompt}\nAvoid: ${req.negativePrompt}.` : req.prompt;
+      // Veo rejects a separate negative prompt when a reference image is attached, and
+      // appending the avoid-list to the text trips its audio filter, so it's only sent
+      // without a reference image. The prompt itself already rules out text, music and logos.
+      const prompt = req.prompt;
       // Clips play muted, so ask for no audio (fewer audio-related failures). If this
       // model doesn't accept the flag, fall back to the default once.
+      const ref = req.referenceImage
+        ? { imageBytes: req.referenceImage.bytes.toString('base64'), mimeType: req.referenceImage.mimeType }
+        : undefined;
+      const asAsset = ref && opts.referenceMode === 'asset';
       const request = (audioFlag: boolean) =>
         ai.models.generateVideos({
           model: opts.model,
-          source: { prompt },
+          source: ref && !asAsset ? { prompt, image: ref } : { prompt },
           config: {
             aspectRatio: req.aspectRatio,
             durationSeconds: req.durationSec,
             personGeneration: opts.personGeneration,
             numberOfVideos: 1,
             ...(audioFlag ? { generateAudio: false } : {}),
-            ...(req.referenceImage
-              ? {
-                  referenceImages: [
-                    {
-                      image: { imageBytes: req.referenceImage.bytes.toString('base64'), mimeType: req.referenceImage.mimeType },
-                      referenceType: VideoGenerationReferenceType.ASSET,
-                    },
-                  ],
-                }
+            ...(asAsset
+              ? { referenceImages: [{ image: ref, referenceType: VideoGenerationReferenceType.ASSET }] }
               : { negativePrompt: req.negativePrompt }),
           },
         });
