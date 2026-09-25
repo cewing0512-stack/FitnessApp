@@ -32,6 +32,7 @@ interface VeoOptions {
 export function createVeoProvider(opts: VeoOptions): VideoProvider & ImageProvider {
   const ai = new GoogleGenAI({ apiKey: opts.apiKey });
   const pollMs = opts.pollMs ?? 10_000;
+  let audioFlagSupported = true;
 
   return {
     name: 'veo',
@@ -42,30 +43,41 @@ export function createVeoProvider(opts: VeoOptions): VideoProvider & ImageProvid
       // Veo rejects a separate negative prompt when a reference image is attached,
       // so in that case the "avoid" list goes into the prompt text instead.
       const prompt = req.referenceImage ? `${req.prompt}\nAvoid: ${req.negativePrompt}.` : req.prompt;
-      let op = await withRetry(
-        () =>
-          ai.models.generateVideos({
-            model: opts.model,
-            source: { prompt },
-            config: {
-              aspectRatio: req.aspectRatio,
-              durationSeconds: req.durationSec,
-              personGeneration: opts.personGeneration,
-              numberOfVideos: 1,
-              ...(req.referenceImage
-                ? {
-                    referenceImages: [
-                      {
-                        image: { imageBytes: req.referenceImage.bytes.toString('base64'), mimeType: req.referenceImage.mimeType },
-                        referenceType: VideoGenerationReferenceType.ASSET,
-                      },
-                    ],
-                  }
-                : { negativePrompt: req.negativePrompt }),
-            },
-          }),
-        req.log,
-      );
+      // Clips play muted, so ask for no audio (fewer audio-related failures). If this
+      // model doesn't accept the flag, fall back to the default once.
+      const request = (audioFlag: boolean) =>
+        ai.models.generateVideos({
+          model: opts.model,
+          source: { prompt },
+          config: {
+            aspectRatio: req.aspectRatio,
+            durationSeconds: req.durationSec,
+            personGeneration: opts.personGeneration,
+            numberOfVideos: 1,
+            ...(audioFlag ? { generateAudio: false } : {}),
+            ...(req.referenceImage
+              ? {
+                  referenceImages: [
+                    {
+                      image: { imageBytes: req.referenceImage.bytes.toString('base64'), mimeType: req.referenceImage.mimeType },
+                      referenceType: VideoGenerationReferenceType.ASSET,
+                    },
+                  ],
+                }
+              : { negativePrompt: req.negativePrompt }),
+          },
+        });
+      let op = await withRetry(async () => {
+        if (!audioFlagSupported) return request(false);
+        try {
+          return await request(true);
+        } catch (e) {
+          if (!/generate_?audio|generateAudio/i.test(String(e))) throw e;
+          audioFlagSupported = false;
+          req.log('model does not accept generateAudio=false; using its default');
+          return request(false);
+        }
+      }, req.log);
 
       while (!op.done) {
         await sleep(pollMs);

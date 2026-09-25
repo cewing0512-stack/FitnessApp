@@ -40,8 +40,7 @@ export function buildPrompt(input: {
   const mat = floor ? ' A dark gray exercise mat lies on the floor.' : '';
   const reps = input.holdOrStretch
     ? 'She moves into the position slowly and holds it with steady breathing, making small natural movements.'
-    : 'She performs two or three slow, controlled repetitions with textbook technique and a full range of motion ' +
-      '(about two seconds down, a brief pause at the bottom so the end position is clearly visible, then up).';
+    : 'She performs two or three slow, controlled repetitions through a full range of motion with correct technique.';
 
   return [
     'Vertical 9:16 fitness demonstration video, one continuous shot.',
