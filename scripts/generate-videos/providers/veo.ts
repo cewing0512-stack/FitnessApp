@@ -11,7 +11,9 @@ async function withRetry<T>(fn: () => Promise<T>, log: (m: string) => void = con
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       const temporary = /\b(429|500|502|503|504)\b|UNAVAILABLE|RESOURCE_EXHAUSTED|overloaded|ECONNRESET|fetch failed/i.test(msg);
-      if (!temporary || i >= attempts) throw e;
+      // A spent daily quota won't come back within a few retries.
+      const dailyQuota = /exceeded your current quota/i.test(msg);
+      if (!temporary || dailyQuota || i >= attempts) throw e;
       const wait = Math.min(60, 5 * 2 ** (i - 1));
       log(`temporary error (${msg.slice(0, 80)}…), retrying in ${wait}s [${i}/${attempts - 1}]`);
       await sleep(wait * 1000);

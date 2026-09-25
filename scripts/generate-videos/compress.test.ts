@@ -18,7 +18,12 @@ describe('videoFilter', () => {
 
   it('only scales when blending is off or the clip is too short', () => {
     expect(videoFilter(8, false)).not.toContain('xfade');
+    expect(videoFilter(8, false)).not.toContain('trim');
     expect(videoFilter(1.5, true)).not.toContain('xfade');
+  });
+
+  it('cuts at the chosen loop point', () => {
+    expect(videoFilter(6.2, true)).toContain('trim=end=6.200');
   });
 });
 
@@ -36,7 +41,9 @@ describe('compressClip (real ffmpeg)', () => {
 
     const r = await compressClip(input, dir, 'test-clip');
     expect(fs.existsSync(path.join(dir, 'test-clip.jpg'))).toBe(true);
-    expect(await probeDuration(r.mp4)).toBeCloseTo(4 - LOOP_FADE_SEC, 1);
+    const out = await probeDuration(r.mp4);
+    expect(out).toBeGreaterThan(1.5);
+    expect(out).toBeLessThanOrEqual(4 - LOOP_FADE_SEC + 0.05);
 
     const { stderr } = await run(ffmpegStatic!, ['-hide_banner', '-i', r.mp4]).catch((e) => e);
     expect(stderr).toMatch(/720x1280/);

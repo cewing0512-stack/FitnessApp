@@ -242,6 +242,9 @@ async function generate() {
 
   console.log(`\nFinished: ${specs.length - failures.length}/${specs.length} clips.`);
   if (failures.length) {
+    if (failures.some((f) => /exceeded your current quota/i.test(f.error))) {
+      console.log('Daily API quota reached. Nothing was charged for these. Re-run after it resets (see https://ai.dev/rate-limit).');
+    }
     console.log('Failed (re-run the same command to retry just these):');
     for (const f of failures) console.log(`  ${f.id}: ${f.error}`);
     process.exitCode = 1;
