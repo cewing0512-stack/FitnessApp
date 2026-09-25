@@ -39,27 +39,33 @@ export function createVeoProvider(opts: VeoOptions): VideoProvider & ImageProvid
 
     async generate(req: VideoRequest) {
       const started = Date.now();
-      let op = await withRetry(() => ai.models.generateVideos({
-        model: opts.model,
-        prompt: req.prompt,
-        config: {
-          aspectRatio: req.aspectRatio,
-          durationSeconds: req.durationSec,
-          negativePrompt: req.negativePrompt,
-          personGeneration: opts.personGeneration,
-          numberOfVideos: 1,
-          ...(req.referenceImage
-            ? {
-                referenceImages: [
-                  {
-                    image: { imageBytes: req.referenceImage.bytes.toString('base64'), mimeType: req.referenceImage.mimeType },
-                    referenceType: VideoGenerationReferenceType.ASSET,
-                  },
-                ],
-              }
-            : {}),
-        },
-      }), req.log);
+      // Veo rejects a separate negative prompt when a reference image is attached,
+      // so in that case the "avoid" list goes into the prompt text instead.
+      const prompt = req.referenceImage ? `${req.prompt}\nAvoid: ${req.negativePrompt}.` : req.prompt;
+      let op = await withRetry(
+        () =>
+          ai.models.generateVideos({
+            model: opts.model,
+            source: { prompt },
+            config: {
+              aspectRatio: req.aspectRatio,
+              durationSeconds: req.durationSec,
+              personGeneration: opts.personGeneration,
+              numberOfVideos: 1,
+              ...(req.referenceImage
+                ? {
+                    referenceImages: [
+                      {
+                        image: { imageBytes: req.referenceImage.bytes.toString('base64'), mimeType: req.referenceImage.mimeType },
+                        referenceType: VideoGenerationReferenceType.ASSET,
+                      },
+                    ],
+                  }
+                : { negativePrompt: req.negativePrompt }),
+            },
+          }),
+        req.log,
+      );
 
       while (!op.done) {
         await sleep(pollMs);
