@@ -27,7 +27,8 @@ interface VeoOptions {
   personGeneration: string;
   /**
    * How the character photo is used: 'asset' sends it as a reference image;
-   * 'first-frame' starts the clip from the photo (image-to-video).
+   * 'first-frame' starts the clip from the image it is given (image-to-video). With
+   * start frames, that image is the character already in the exercise's start position.
    */
   referenceMode: 'asset' | 'first-frame';
   pollMs?: number;
@@ -96,6 +97,25 @@ export function createVeoProvider(opts: VeoOptions): VideoProvider & ImageProvid
         throw new Error(`Veo returned no video${reasons ? ` (safety filter: ${reasons})` : ''}. Try again or adjust the prompt.`);
       }
       await withRetry(() => ai.files.download({ file: video, downloadPath: req.outPath }), req.log);
+    },
+
+    async editImage(reference, prompt) {
+      const res = await withRetry(() =>
+        ai.models.generateContent({
+          model: opts.imageModel,
+          contents: [
+            { inlineData: { data: reference.bytes.toString('base64'), mimeType: reference.mimeType } },
+            { text: prompt },
+          ],
+          config: { responseModalities: ['IMAGE'], imageConfig: { aspectRatio: '9:16' } },
+        }),
+      );
+      for (const part of res.candidates?.[0]?.content?.parts ?? []) {
+        if (part.inlineData?.data) {
+          return { bytes: Buffer.from(part.inlineData.data, 'base64'), mimeType: part.inlineData.mimeType ?? 'image/png' };
+        }
+      }
+      throw new Error('The image model returned no image for the start frame.');
     },
 
     async generateImages(prompt: string, count: number) {

@@ -14,7 +14,8 @@
     "videos:prompts": "tsx scripts/generate-videos/index.ts prompts",
     "videos:status": "tsx scripts/generate-videos/index.ts status",
     "videos:character": "tsx scripts/generate-videos/index.ts character",
-    "videos:import": "tsx scripts/generate-videos/index.ts import"
+    "videos:import": "tsx scripts/generate-videos/index.ts import",
+    "videos:frames": "tsx scripts/generate-videos/index.ts frames"
   },
   "dependencies": {
     "idb": "^8.0.3",

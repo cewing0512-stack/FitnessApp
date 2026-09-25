@@ -49,6 +49,22 @@ const outFile = (id: string, ext: string) => path.join(PATHS.output, `${id}.${ex
 const fmtMB = (b: number) => `${(b / 1024 / 1024).toFixed(2)} MB`;
 const characterPath = env.CHARACTER_IMAGE || DEFAULTS.characterImage;
 const OPTIONS_DIR = 'scripts/generate-videos/character-options';
+/** 'start-frame' (default): animate from the character redrawn in each start position. */
+const referenceMode = env.VEO_REFERENCE_MODE || 'start-frame';
+const startFramePath = (id: string) => path.join(PATHS.raw, `start-${id}.png`);
+const readImage = async (p: string) => ({ bytes: await fsp.readFile(p), mimeType: p.endsWith('.jpg') ? 'image/jpeg' : 'image/png' });
+
+/** Creates (or reuses) the start-position frame for a clip. */
+async function ensureStartFrame(spec: ClipSpec, provider: ReturnType<typeof getProvider>, force: boolean) {
+  const file = startFramePath(spec.id);
+  if (!force && exists(file)) return file;
+  if (!provider.editImage) throw new Error(`Provider ${provider.name} cannot create start frames. Set VEO_REFERENCE_MODE=asset.`);
+  if (!exists(characterPath)) throw new Error('No character.png yet. Run npm run videos:character first.');
+  await fsp.mkdir(PATHS.raw, { recursive: true });
+  const img = await provider.editImage(await readImage(characterPath), spec.startFramePrompt);
+  await fsp.writeFile(file, img.bytes);
+  return file;
+}
 
 async function main() {
   switch (command) {
@@ -60,6 +76,8 @@ async function main() {
       return character();
     case 'import':
       return importInbox();
+    case 'frames':
+      return frames();
     case 'generate':
       return generate();
     default:
@@ -104,6 +122,18 @@ async function character() {
   console.log(`Saved ${images.length} options in ${OPTIONS_DIR}/. Pick one with: npm run videos:character -- --pick <n>`);
 }
 
+/** Creates start frames only (a few cents each) so poses can be checked before paying for video. */
+async function frames() {
+  const only = args.only?.split(',').map((x) => x.trim()).filter(Boolean);
+  if (!only?.length) throw new Error('Pass --only id1,id2 (start frames cost a few cents each).');
+  const specs = allClipSpecs({ includeMoves: true }).filter((x) => only.includes(x.id));
+  const provider = getProvider(env);
+  for (const spec of specs) {
+    const file = await ensureStartFrame(spec, provider, args.force);
+    console.log(`  ✓ ${spec.id}: ${file}`);
+  }
+}
+
 async function importInbox() {
   const known = new Set(allClipSpecs({ includeMoves: true }).map((s) => s.id));
   await fsp.mkdir(PATHS.inbox, { recursive: true });
@@ -144,7 +174,7 @@ async function generate() {
 
   const hasRef = exists(characterPath);
   console.log(`Provider: ${env.VIDEO_PROVIDER || DEFAULTS.provider} (${env.VEO_MODEL || DEFAULTS.veoModel})`);
-  console.log(`Character reference: ${hasRef ? characterPath : 'none (text description only)'}`);
+  console.log(`Character reference: ${hasRef ? `${characterPath} (${referenceMode})` : 'none (text description only)'}`);
   console.log(`Clips to generate: ${specs.length}${skipped.length ? ` (${skipped.length} already exist, use --force to redo)` : ''}`);
   console.log(`Length: ${duration}s each, vertical 9:16`);
   console.log(
@@ -168,10 +198,7 @@ async function generate() {
   }
 
   const provider = getProvider(env);
-  const referenceImage =
-    hasRef && provider.supportsReferenceImage
-      ? { bytes: await fsp.readFile(characterPath), mimeType: characterPath.endsWith('.jpg') ? 'image/jpeg' : 'image/png' }
-      : undefined;
+  const characterImage = hasRef && provider.supportsReferenceImage ? await readImage(characterPath) : undefined;
   await fsp.mkdir(PATHS.raw, { recursive: true });
 
   const failures: { id: string; error: string }[] = [];
@@ -183,6 +210,11 @@ async function generate() {
       const raw = path.join(PATHS.raw, `${s.id}.mp4`);
       try {
         if (args.force || !exists(raw)) {
+          let referenceImage = characterImage;
+          if (characterImage && referenceMode === 'start-frame') {
+            log('start frame…');
+            referenceImage = await readImage(await ensureStartFrame(s, provider, false));
+          }
           log('generating…');
           await provider.generate({
             id: s.id,

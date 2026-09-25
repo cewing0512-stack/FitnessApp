@@ -26,4 +26,6 @@ export interface VideoRequest {
 export interface ImageProvider {
   /** Generates `count` still images and returns their bytes (PNG/JPEG). */
   generateImages(prompt: string, count: number): Promise<{ bytes: Buffer; mimeType: string }[]>;
+  /** Redraws a reference photo according to the prompt (same person, new pose). */
+  editImage(reference: { bytes: Buffer; mimeType: string }, prompt: string): Promise<{ bytes: Buffer; mimeType: string }>;
 }

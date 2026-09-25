@@ -8,6 +8,8 @@ export interface ClipSpec {
   name: string;
   kind: 'exercise' | 'warmup' | 'cooldown';
   prompt: string;
+  /** Instruction for redrawing the character photo in this exercise's start position. */
+  startFramePrompt: string;
 }
 
 const FLOOR_WORDS = /\b(lying|lies|on her back|face down|plank|seated|kneeling|half-kneeling|hands and knees|on a mat)\b/i;
@@ -23,6 +25,36 @@ function equipmentLine(equipment: Equipment | 'none'): string {
   }
 }
 
+function cameraLine(motion: string, sideView?: boolean): string {
+  if (FLOOR_WORDS.test(motion)) {
+    return 'Locked-off static camera, slightly elevated side view, framed so her entire body on the mat is visible with margin on all sides.';
+  }
+  return sideView
+    ? 'Locked-off static camera at hip height filming her in a clean side profile (she faces the left edge of the frame), ' +
+        'so the depth of each rep and the angle of her back are clearly visible; her entire body is in frame from head to feet with space above and below.'
+    : 'Locked-off static camera at hip height, facing her at a slight three-quarter angle, her entire body visible from head to feet with space above her head and below her feet.';
+}
+
+/** The first sentence of a motion description is the starting position. */
+export const startPosition = (motion: string) => /^.*?\.(?=\s|$)/.exec(motion)?.[0] ?? motion;
+
+/**
+ * Instruction for the image model: redraw the character photo in the exercise's
+ * start position. Veo then animates from that frame, instead of from the standing
+ * reference photo, which kept pulling every movement back toward standing upright.
+ */
+export function buildStartFramePrompt(input: { name: string; motion: string; equipment: Equipment | 'none'; sideView?: boolean }): string {
+  const floor = FLOOR_WORDS.test(input.motion);
+  return [
+    'Using the attached photo, create a new photo of the exact same woman: same face, hair, body and outfit.',
+    `She is now in the starting position of the exercise "${input.name}": ${startPosition(input.motion)}`,
+    equipmentLine(input.equipment),
+    `Setting: ${SETTING}.${floor ? ' A dark gray exercise mat lies on the floor.' : ''}`,
+    `Camera: ${cameraLine(input.motion, input.sideView).replace('Locked-off static camera', 'camera')}`,
+    'Vertical 9:16, photorealistic, sharp focus, correct anatomy and a natural, correct exercise posture. Mouth closed, focused expression.',
+  ].join('\n');
+}
+
 /**
  * Builds the full text prompt for one clip: the shared character, setting and
  * camera rules, plus the exercise-specific motion and form cues.
@@ -36,12 +68,7 @@ export function buildPrompt(input: {
   sideView?: boolean;
 }): string {
   const floor = FLOOR_WORDS.test(input.motion);
-  const camera = floor
-    ? 'Locked-off static camera, slightly elevated side view, framed so her entire body on the mat is visible with margin on all sides.'
-    : input.sideView
-      ? 'Locked-off static camera at hip height filming her in a clean side profile (she faces the left edge of the frame), ' +
-        'so the depth of each rep and the angle of her back are clearly visible; her entire body is in frame from head to feet with space above and below.'
-      : 'Locked-off static camera at hip height, facing her at a slight three-quarter angle, her entire body visible from head to feet with space above her head and below her feet.';
+  const camera = cameraLine(input.motion, input.sideView);
   const mat = floor ? ' A dark gray exercise mat lies on the floor.' : '';
   const reps = input.holdOrStretch
     ? 'She moves into the position slowly and holds it with steady breathing, making small natural movements.'
@@ -92,6 +119,7 @@ export function allClipSpecs(opts: { includeMoves: boolean }): ClipSpec[] {
       holdOrStretch: HOLD_IDS.has(e.id),
       sideView: SIDE_VIEW_IDS.has(e.id),
     }),
+    startFramePrompt: buildStartFramePrompt({ name: e.name, motion: e.motion, equipment: e.equipment, sideView: SIDE_VIEW_IDS.has(e.id) }),
   }));
   if (!opts.includeMoves) return exercises;
   const moves: ClipSpec[] = MOVES.map((m) => ({
@@ -99,6 +127,7 @@ export function allClipSpecs(opts: { includeMoves: boolean }): ClipSpec[] {
     name: m.name,
     kind: m.kind,
     prompt: buildPrompt({ motion: m.motion, cues: m.cues, equipment: 'none', holdOrStretch: m.kind === 'cooldown' }),
+    startFramePrompt: buildStartFramePrompt({ name: m.name, motion: m.motion, equipment: 'none' }),
   }));
   return [...exercises, ...moves];
 }
