@@ -34,8 +34,9 @@ describe('video prompts', () => {
     const floor = specs.find((s) => s.id === 'floor-press')!.prompt;
     expect(floor).toContain('side view');
     expect(floor).toContain('exercise mat');
+    expect(specs.find((s) => s.id === 'goblet-squat')!.prompt).toContain('side profile');
     const standing = specs.find((s) => s.id === 'bicep-curl')!.prompt;
-    expect(standing).toContain('hip height');
+    expect(standing).toContain('three-quarter');
     expect(standing).not.toContain('exercise mat');
   });
 

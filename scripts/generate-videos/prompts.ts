@@ -32,11 +32,16 @@ export function buildPrompt(input: {
   cues: string[];
   equipment: Equipment | 'none';
   holdOrStretch?: boolean;
+  /** Film in side profile, so squat depth and back angle are easy to see. */
+  sideView?: boolean;
 }): string {
   const floor = FLOOR_WORDS.test(input.motion);
   const camera = floor
     ? 'Locked-off static camera, slightly elevated side view, framed so her entire body on the mat is visible with margin on all sides.'
-    : 'Locked-off static camera at hip height, facing her at a slight three-quarter angle, her entire body visible from head to feet with space above her head and below her feet.';
+    : input.sideView
+      ? 'Locked-off static camera at hip height filming her in a clean side profile (she faces the left edge of the frame), ' +
+        'so the depth of each rep and the angle of her back are clearly visible; her entire body is in frame from head to feet with space above and below.'
+      : 'Locked-off static camera at hip height, facing her at a slight three-quarter angle, her entire body visible from head to feet with space above her head and below her feet.';
   const mat = floor ? ' A dark gray exercise mat lies on the floor.' : '';
   const reps = input.holdOrStretch
     ? 'She moves into the position slowly and holds it with steady breathing, making small natural movements.'
@@ -59,12 +64,34 @@ export function buildPrompt(input: {
 
 const HOLD_IDS = new Set(['side-plank']);
 
+/** Standing moves where depth or back angle matter most: filmed from the side. */
+export const SIDE_VIEW_IDS = new Set([
+  'goblet-squat',
+  'reverse-lunge',
+  'split-squat',
+  'romanian-deadlift',
+  'single-leg-rdl',
+  'bent-over-row',
+  'single-arm-row',
+  'rear-delt-fly',
+  'triceps-kickback',
+  'thruster',
+  'dumbbell-swing',
+  'clean-and-press',
+]);
+
 export function allClipSpecs(opts: { includeMoves: boolean }): ClipSpec[] {
   const exercises: ClipSpec[] = EXERCISES.map((e) => ({
     id: e.id,
     name: e.name,
     kind: 'exercise',
-    prompt: buildPrompt({ motion: e.motion, cues: e.cues, equipment: e.equipment, holdOrStretch: HOLD_IDS.has(e.id) }),
+    prompt: buildPrompt({
+      motion: e.motion,
+      cues: e.cues,
+      equipment: e.equipment,
+      holdOrStretch: HOLD_IDS.has(e.id),
+      sideView: SIDE_VIEW_IDS.has(e.id),
+    }),
   }));
   if (!opts.includeMoves) return exercises;
   const moves: ClipSpec[] = MOVES.map((m) => ({

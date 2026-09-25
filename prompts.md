@@ -74,7 +74,7 @@ Save as: `triceps-kickback.mp4`
 
 ```text
 Vertical 9:16 fitness demonstration video, one continuous shot.
-Locked-off static camera at hip height, facing her at a slight three-quarter angle, her entire body visible from head to feet with space above her head and below her feet.
+Locked-off static camera at hip height filming her in a clean side profile (she faces the left edge of the frame), so the depth of each rep and the angle of her back are clearly visible; her entire body is in frame from head to feet with space above and below.
 The person is the same athletic woman in her early 30s in every clip: toned, healthy build, dark brown hair pulled back in a high ponytail, light natural makeup, wearing a fitted sage-green tank top, black high-waisted full-length leggings and clean white training sneakers.
 Setting: a minimal, bright photo studio with a seamless light-gray backdrop and a matching light-gray floor, soft even lighting with gentle shadows, nothing else in the room.
 She uses a pair of matching black hexagonal rubber dumbbells.
@@ -170,7 +170,7 @@ Save as: `rear-delt-fly.mp4`
 
 ```text
 Vertical 9:16 fitness demonstration video, one continuous shot.
-Locked-off static camera at hip height, facing her at a slight three-quarter angle, her entire body visible from head to feet with space above her head and below her feet.
+Locked-off static camera at hip height filming her in a clean side profile (she faces the left edge of the frame), so the depth of each rep and the angle of her back are clearly visible; her entire body is in frame from head to feet with space above and below.
 The person is the same athletic woman in her early 30s in every clip: toned, healthy build, dark brown hair pulled back in a high ponytail, light natural makeup, wearing a fitted sage-green tank top, black high-waisted full-length leggings and clean white training sneakers.
 Setting: a minimal, bright photo studio with a seamless light-gray backdrop and a matching light-gray floor, soft even lighting with gentle shadows, nothing else in the room.
 She uses a pair of matching black hexagonal rubber dumbbells.
@@ -186,7 +186,7 @@ Save as: `bent-over-row.mp4`
 
 ```text
 Vertical 9:16 fitness demonstration video, one continuous shot.
-Locked-off static camera at hip height, facing her at a slight three-quarter angle, her entire body visible from head to feet with space above her head and below her feet.
+Locked-off static camera at hip height filming her in a clean side profile (she faces the left edge of the frame), so the depth of each rep and the angle of her back are clearly visible; her entire body is in frame from head to feet with space above and below.
 The person is the same athletic woman in her early 30s in every clip: toned, healthy build, dark brown hair pulled back in a high ponytail, light natural makeup, wearing a fitted sage-green tank top, black high-waisted full-length leggings and clean white training sneakers.
 Setting: a minimal, bright photo studio with a seamless light-gray backdrop and a matching light-gray floor, soft even lighting with gentle shadows, nothing else in the room.
 She uses a pair of matching black hexagonal rubber dumbbells.
@@ -202,7 +202,7 @@ Save as: `single-arm-row.mp4`
 
 ```text
 Vertical 9:16 fitness demonstration video, one continuous shot.
-Locked-off static camera at hip height, facing her at a slight three-quarter angle, her entire body visible from head to feet with space above her head and below her feet.
+Locked-off static camera at hip height filming her in a clean side profile (she faces the left edge of the frame), so the depth of each rep and the angle of her back are clearly visible; her entire body is in frame from head to feet with space above and below.
 The person is the same athletic woman in her early 30s in every clip: toned, healthy build, dark brown hair pulled back in a high ponytail, light natural makeup, wearing a fitted sage-green tank top, black high-waisted full-length leggings and clean white training sneakers.
 Setting: a minimal, bright photo studio with a seamless light-gray backdrop and a matching light-gray floor, soft even lighting with gentle shadows, nothing else in the room.
 She uses a single black hexagonal rubber dumbbell.
@@ -298,7 +298,7 @@ Save as: `goblet-squat.mp4`
 
 ```text
 Vertical 9:16 fitness demonstration video, one continuous shot.
-Locked-off static camera at hip height, facing her at a slight three-quarter angle, her entire body visible from head to feet with space above her head and below her feet.
+Locked-off static camera at hip height filming her in a clean side profile (she faces the left edge of the frame), so the depth of each rep and the angle of her back are clearly visible; her entire body is in frame from head to feet with space above and below.
 The person is the same athletic woman in her early 30s in every clip: toned, healthy build, dark brown hair pulled back in a high ponytail, light natural makeup, wearing a fitted sage-green tank top, black high-waisted full-length leggings and clean white training sneakers.
 Setting: a minimal, bright photo studio with a seamless light-gray backdrop and a matching light-gray floor, soft even lighting with gentle shadows, nothing else in the room.
 She uses a single black hexagonal rubber dumbbell.
@@ -330,7 +330,7 @@ Save as: `reverse-lunge.mp4`
 
 ```text
 Vertical 9:16 fitness demonstration video, one continuous shot.
-Locked-off static camera at hip height, facing her at a slight three-quarter angle, her entire body visible from head to feet with space above her head and below her feet.
+Locked-off static camera at hip height filming her in a clean side profile (she faces the left edge of the frame), so the depth of each rep and the angle of her back are clearly visible; her entire body is in frame from head to feet with space above and below.
 The person is the same athletic woman in her early 30s in every clip: toned, healthy build, dark brown hair pulled back in a high ponytail, light natural makeup, wearing a fitted sage-green tank top, black high-waisted full-length leggings and clean white training sneakers.
 Setting: a minimal, bright photo studio with a seamless light-gray backdrop and a matching light-gray floor, soft even lighting with gentle shadows, nothing else in the room.
 She uses a pair of matching black hexagonal rubber dumbbells.
@@ -362,7 +362,7 @@ Save as: `split-squat.mp4`
 
 ```text
 Vertical 9:16 fitness demonstration video, one continuous shot.
-Locked-off static camera at hip height, facing her at a slight three-quarter angle, her entire body visible from head to feet with space above her head and below her feet.
+Locked-off static camera at hip height filming her in a clean side profile (she faces the left edge of the frame), so the depth of each rep and the angle of her back are clearly visible; her entire body is in frame from head to feet with space above and below.
 The person is the same athletic woman in her early 30s in every clip: toned, healthy build, dark brown hair pulled back in a high ponytail, light natural makeup, wearing a fitted sage-green tank top, black high-waisted full-length leggings and clean white training sneakers.
 Setting: a minimal, bright photo studio with a seamless light-gray backdrop and a matching light-gray floor, soft even lighting with gentle shadows, nothing else in the room.
 She uses a pair of matching black hexagonal rubber dumbbells.
@@ -394,7 +394,7 @@ Save as: `romanian-deadlift.mp4`
 
 ```text
 Vertical 9:16 fitness demonstration video, one continuous shot.
-Locked-off static camera at hip height, facing her at a slight three-quarter angle, her entire body visible from head to feet with space above her head and below her feet.
+Locked-off static camera at hip height filming her in a clean side profile (she faces the left edge of the frame), so the depth of each rep and the angle of her back are clearly visible; her entire body is in frame from head to feet with space above and below.
 The person is the same athletic woman in her early 30s in every clip: toned, healthy build, dark brown hair pulled back in a high ponytail, light natural makeup, wearing a fitted sage-green tank top, black high-waisted full-length leggings and clean white training sneakers.
 Setting: a minimal, bright photo studio with a seamless light-gray backdrop and a matching light-gray floor, soft even lighting with gentle shadows, nothing else in the room.
 She uses a pair of matching black hexagonal rubber dumbbells.
@@ -410,7 +410,7 @@ Save as: `single-leg-rdl.mp4`
 
 ```text
 Vertical 9:16 fitness demonstration video, one continuous shot.
-Locked-off static camera at hip height, facing her at a slight three-quarter angle, her entire body visible from head to feet with space above her head and below her feet.
+Locked-off static camera at hip height filming her in a clean side profile (she faces the left edge of the frame), so the depth of each rep and the angle of her back are clearly visible; her entire body is in frame from head to feet with space above and below.
 The person is the same athletic woman in her early 30s in every clip: toned, healthy build, dark brown hair pulled back in a high ponytail, light natural makeup, wearing a fitted sage-green tank top, black high-waisted full-length leggings and clean white training sneakers.
 Setting: a minimal, bright photo studio with a seamless light-gray backdrop and a matching light-gray floor, soft even lighting with gentle shadows, nothing else in the room.
 She uses a single black hexagonal rubber dumbbell.
@@ -602,7 +602,7 @@ Save as: `thruster.mp4`
 
 ```text
 Vertical 9:16 fitness demonstration video, one continuous shot.
-Locked-off static camera at hip height, facing her at a slight three-quarter angle, her entire body visible from head to feet with space above her head and below her feet.
+Locked-off static camera at hip height filming her in a clean side profile (she faces the left edge of the frame), so the depth of each rep and the angle of her back are clearly visible; her entire body is in frame from head to feet with space above and below.
 The person is the same athletic woman in her early 30s in every clip: toned, healthy build, dark brown hair pulled back in a high ponytail, light natural makeup, wearing a fitted sage-green tank top, black high-waisted full-length leggings and clean white training sneakers.
 Setting: a minimal, bright photo studio with a seamless light-gray backdrop and a matching light-gray floor, soft even lighting with gentle shadows, nothing else in the room.
 She uses a pair of matching black hexagonal rubber dumbbells.
@@ -618,7 +618,7 @@ Save as: `clean-and-press.mp4`
 
 ```text
 Vertical 9:16 fitness demonstration video, one continuous shot.
-Locked-off static camera at hip height, facing her at a slight three-quarter angle, her entire body visible from head to feet with space above her head and below her feet.
+Locked-off static camera at hip height filming her in a clean side profile (she faces the left edge of the frame), so the depth of each rep and the angle of her back are clearly visible; her entire body is in frame from head to feet with space above and below.
 The person is the same athletic woman in her early 30s in every clip: toned, healthy build, dark brown hair pulled back in a high ponytail, light natural makeup, wearing a fitted sage-green tank top, black high-waisted full-length leggings and clean white training sneakers.
 Setting: a minimal, bright photo studio with a seamless light-gray backdrop and a matching light-gray floor, soft even lighting with gentle shadows, nothing else in the room.
 She uses a pair of matching black hexagonal rubber dumbbells.
@@ -634,7 +634,7 @@ Save as: `dumbbell-swing.mp4`
 
 ```text
 Vertical 9:16 fitness demonstration video, one continuous shot.
-Locked-off static camera at hip height, facing her at a slight three-quarter angle, her entire body visible from head to feet with space above her head and below her feet.
+Locked-off static camera at hip height filming her in a clean side profile (she faces the left edge of the frame), so the depth of each rep and the angle of her back are clearly visible; her entire body is in frame from head to feet with space above and below.
 The person is the same athletic woman in her early 30s in every clip: toned, healthy build, dark brown hair pulled back in a high ponytail, light natural makeup, wearing a fitted sage-green tank top, black high-waisted full-length leggings and clean white training sneakers.
 Setting: a minimal, bright photo studio with a seamless light-gray backdrop and a matching light-gray floor, soft even lighting with gentle shadows, nothing else in the room.
 She uses a single black hexagonal rubber dumbbell.
