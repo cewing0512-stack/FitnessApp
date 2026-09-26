@@ -72,11 +72,19 @@ Commands:
 ```bash
 npm run videos:character                  # 4 candidate photos of the character → pick one:
 npm run videos:character -- --pick 2      # saves it as scripts/generate-videos/character.png
-npm run videos -- --only goblet-squat     # ONE test clip (~$1.20). Check it before doing the rest
+npm run videos:frames -- --only hammer-curl   # start-pose image(s) only (a few cents): check the pose first
+npm run videos -- --only hammer-curl      # ONE clip (~$1.20). Always review before keeping
 npm run videos                            # every missing exercise clip (asks before spending)
-npm run videos -- --include-moves         # also the warm-up and stretch moves
 npm run videos:status                     # what's done / missing
 ```
+
+**How clips are made (start-frame mode, the default):** the image model first redraws the character photo in the exercise's starting position, then Veo animates from that frame. Earlier approaches, like sending the standing photo as a reference, kept pulling every movement back toward standing upright.
+
+**What we learned testing Veo 3.1 (Sept 2026):**
+- **Review every clip.** Only about 1 in 3 had form good enough to keep. Standing dumbbell moves (rows, curls) work best. Deep squats, lunges and floor exercises (bridges, crunches) usually come out wrong, so those keep the animated placeholder for now.
+- **Standard Veo 3.1 wasn't better** than Fast for form, so use Fast.
+- **Never let the prompt imply speech.** Veo invents a soundtrack, and if the character "talks" its audio safety filter refuses the clip (not charged). The prompts say she never talks.
+- **New API accounts have a small daily Veo quota** (a handful of clips per day). Rejected requests aren't charged. Re-run the same command the next day; finished clips are skipped.
 
 - **Consistency:** every prompt shares the same character, outfit, studio and camera rules (`scripts/generate-videos/config.ts`), plus that exercise's motion description and form cues. When `character.png` exists, it's also sent to Veo as a reference image.
 - **Cost:** the script prints an estimate and asks for confirmation before generating. It uses about $0.15 per second on Veo 3.1 Fast (≈ $1.20 per 8s clip, ≈ $48 for all 40 exercises). Pricing changes, so check Google's pricing page. Set `VEO_MODEL=veo-3.1-generate-preview` for higher quality at a higher price.
