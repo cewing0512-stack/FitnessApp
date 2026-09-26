@@ -305,7 +305,7 @@ export const EXERCISES: Exercise[] = [
     mistakes: ['Heels lifting', 'Knees caving inward', 'Rounding the back at the bottom'],
     modification: 'Squat to a chair, or reduce the depth.',
     motion:
-      'Standing with feet slightly wider than hip-width and toes turned slightly out, she holds one dumbbell vertically against her chest with both hands. She sits her hips down and back into a deep squat with chest tall and knees tracking over toes, then drives through her feet to stand.',
+      'Standing with feet shoulder-width apart and toes turned slightly out, she holds one dumbbell vertically against her upper chest, both palms cupping the top end and elbows pointing down. She sits her hips down and back until her thighs are at least parallel to the floor, chest tall, heels flat and knees tracking over her toes, with the dumbbell staying against her chest the whole time, then drives through her feet to stand.',
   }),
   ex({
     id: 'sumo-squat',
@@ -321,7 +321,7 @@ export const EXERCISES: Exercise[] = [
     mistakes: ['Knees collapsing in', 'Leaning too far forward', 'Stance too narrow'],
     modification: 'Reduce the depth, or use no weight.',
     motion:
-      'Standing in a wide stance with toes turned out about 45 degrees, she holds one dumbbell by one end with both hands, hanging between her legs. She bends her knees and lowers her hips straight down, knees pushing out over toes and chest tall, then stands back up squeezing her glutes.',
+      'Standing in a wide stance with toes turned out about 45 degrees, she holds one dumbbell by one end with both hands, hanging between her legs. She bends her knees and lowers her hips straight down until her thighs are about parallel to the floor, knees pushing out over toes and chest tall, then stands back up squeezing her glutes.',
   }),
   ex({
     id: 'reverse-lunge',

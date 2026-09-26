@@ -2,7 +2,7 @@
 
 A personal dumbbell workout **library** PWA. You browse and pick a workout yourself. The app never schedules anything.
 
-> Status: **Phases 1–4 of 5** are done: the library, the workout player, history, settings, and an installable offline PWA. The AI video pipeline comes next.
+> Status: all 5 phases are built: the library, the workout player, history, settings, an installable offline PWA, and the AI demo-video pipeline.
 
 ## Develop
 
@@ -53,14 +53,53 @@ Durations are never typed in. They're computed as warm-up (3 min) + get-ready + 
 
 For one-sided moves in a straight-through workout, use `...bothSides('split-squat')` to give each side a full 60s block. Otherwise the block is split 30s per side.
 
-## Demo media
+## Demo videos
 
-Drop files into `public/videos/` named after an exercise or move id:
+Each exercise gets a short, silent, looping 9:16 clip of the same AI-generated woman (sage-green tank top, black leggings, white sneakers, light-gray studio), stored as `public/videos/{id}.mp4` plus a `{id}.jpg` thumbnail. The app detects files automatically (via `vite/media-index.ts`). Until a clip exists it shows an animated placeholder, so the app works without any videos.
 
-- `{id}.mp4` (and optionally `{id}.webm`) for the looping demo clip
-- `{id}.jpg` for the thumbnail and poster
+### Generate with Google Veo
 
-The app detects them automatically through a small Vite plugin (`vite/media-index.ts`). Until a file exists, the app shows a clean placeholder, so it's fully usable without any videos.
+Setup, one time:
+
+```bash
+cp .env.example .env        # then paste your key into GEMINI_API_KEY
+```
+
+Get a key at [Google AI Studio](https://aistudio.google.com/apikey). Veo is a paid model, so billing must be enabled on the key's Google Cloud project.
+
+Commands:
+
+```bash
+npm run videos:character                  # 4 candidate photos of the character → pick one:
+npm run videos:character -- --pick 2      # saves it as scripts/generate-videos/character.png
+npm run videos:frames -- --only hammer-curl   # start-pose image(s) only (a few cents): check the pose first
+npm run videos -- --only hammer-curl      # ONE clip (~$1.20). Always review before keeping
+npm run videos                            # every missing exercise clip (asks before spending)
+npm run videos:status                     # what's done / missing
+```
+
+**How clips are made (start-frame mode, the default):** the image model first redraws the character photo in the exercise's starting position, then Veo animates from that frame. Earlier approaches, like sending the standing photo as a reference, kept pulling every movement back toward standing upright.
+
+**What we learned testing Veo 3.1 (Sept 2026):**
+- **Review every clip.** Only about 1 in 3 had form good enough to keep. Standing dumbbell moves (rows, curls) work best. Deep squats, lunges and floor exercises (bridges, crunches) usually come out wrong, so those keep the animated placeholder for now.
+- **Standard Veo 3.1 wasn't better** than Fast for form, so use Fast.
+- **Never let the prompt imply speech.** Veo invents a soundtrack, and if the character "talks" its audio safety filter refuses the clip (not charged). The prompts say she never talks.
+- **New API accounts have a small daily Veo quota** (a handful of clips per day). Rejected requests aren't charged. Re-run the same command the next day; finished clips are skipped.
+
+- **Consistency:** every prompt shares the same character, outfit, studio and camera rules (`scripts/generate-videos/config.ts`), plus that exercise's motion description and form cues. When `character.png` exists, it's also sent to Veo as a reference image.
+- **Cost:** the script prints an estimate and asks for confirmation before generating. It uses about $0.15 per second on Veo 3.1 Fast (≈ $1.20 per 8s clip, ≈ $48 for all 40 exercises). Pricing changes, so check Google's pricing page. Set `VEO_MODEL=veo-3.1-generate-preview` for higher quality at a higher price.
+- **Retries:** existing clips are skipped, so if some fail, re-run the same command. Use `--force` to redo a clip you don't like.
+- **Output:** each clip is cropped to 720×1280, audio is removed, and it's compressed to H.264 with fast-start (usually well under 1 MB). The end cross-fades into the start so the loop has no visible jump (`--no-loop` to disable), and a thumbnail is taken from the first frame. Add `--webm` to also write a VP9 WebM.
+- **Other services:** providers are swappable. Implement `VideoProvider` (`scripts/generate-videos/providers/types.ts`) for Runway, Kling, Luma, etc., and register it in `providers/index.ts`. `VIDEO_PROVIDER=mock` renders free test patterns to try the pipeline. Delete those files afterwards.
+
+### Make clips by hand
+
+[`prompts.md`](prompts.md) lists every prompt (regenerate it with `npm run videos:prompts` after editing exercises). Paste a prompt into any web tool, then:
+
+1. Save the clip as the exact name shown (e.g. `goblet-squat.mp4`) in `scripts/generate-videos/inbox/`.
+2. Run `npm run videos:import`. It crops, compresses, loop-blends and thumbnails the clip into `public/videos/`.
+
+Commit `public/videos/` and push. Vercel redeploys, and the app caches each clip for offline use after its first play.
 
 ## The player
 

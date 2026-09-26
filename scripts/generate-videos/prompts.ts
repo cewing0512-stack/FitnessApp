@@ -1,0 +1,180 @@
+import { EXERCISES } from '../../src/data/exercises';
+import { MOVES } from '../../src/data/moves';
+import type { Equipment } from '../../src/data/types';
+import { CHARACTER, NEGATIVE_PROMPT, SETTING, STYLE } from './config';
+
+export interface ClipSpec {
+  id: string;
+  name: string;
+  kind: 'exercise' | 'warmup' | 'cooldown';
+  prompt: string;
+  /** Instruction for redrawing the character photo in this exercise's start position. */
+  startFramePrompt: string;
+}
+
+const FLOOR_WORDS = /\b(lying|lies|on her back|face down|plank|seated|kneeling|half-kneeling|hands and knees|on a mat)\b/i;
+
+function equipmentLine(equipment: Equipment | 'none'): string {
+  switch (equipment) {
+    case 'two-dumbbells':
+      return 'She uses a pair of matching black hexagonal rubber dumbbells.';
+    case 'one-dumbbell':
+      return 'She uses a single black hexagonal rubber dumbbell.';
+    default:
+      return 'She uses no equipment.';
+  }
+}
+
+function cameraLine(motion: string, sideView?: boolean): string {
+  if (FLOOR_WORDS.test(motion)) {
+    return 'Locked-off static camera, slightly elevated side view, framed so her entire body on the mat is visible with margin on all sides.';
+  }
+  return sideView
+    ? 'Locked-off static camera at hip height filming her in a clean side profile (she faces the left edge of the frame), ' +
+        'so the depth of each rep and the angle of her back are clearly visible; her entire body is in frame from head to feet with space above and below.'
+    : 'Locked-off static camera at hip height, facing her at a slight three-quarter angle, her entire body visible from head to feet with space above her head and below her feet.';
+}
+
+/** The first sentence of a motion description is the starting position. */
+export const startPosition = (motion: string) => /^.*?\.(?=\s|$)/.exec(motion)?.[0] ?? motion;
+
+/**
+ * Instruction for the image model: redraw the character photo in the exercise's
+ * start position. Veo then animates from that frame, instead of from the standing
+ * reference photo, which kept pulling every movement back toward standing upright.
+ */
+export function buildStartFramePrompt(input: { name: string; motion: string; equipment: Equipment | 'none'; sideView?: boolean }): string {
+  const floor = FLOOR_WORDS.test(input.motion);
+  return [
+    'Using the attached photo, create a new photo of the exact same woman: same face, hair, body and outfit.',
+    `She is now in the starting position of the exercise "${input.name}": ${startPosition(input.motion)}`,
+    equipmentLine(input.equipment),
+    `Setting: ${SETTING}.${floor ? ' A dark gray exercise mat lies on the floor.' : ''}`,
+    `Camera: ${cameraLine(input.motion, input.sideView).replace('Locked-off static camera', 'camera')}`,
+    'Vertical 9:16, photorealistic, sharp focus, correct anatomy and a natural, correct exercise posture. Mouth closed, focused expression.',
+  ].join('\n');
+}
+
+/**
+ * Builds the full text prompt for one clip: the shared character, setting and
+ * camera rules, plus the exercise-specific motion and form cues.
+ */
+export function buildPrompt(input: {
+  motion: string;
+  cues: string[];
+  equipment: Equipment | 'none';
+  holdOrStretch?: boolean;
+  /** Film in side profile, so squat depth and back angle are easy to see. */
+  sideView?: boolean;
+}): string {
+  const floor = FLOOR_WORDS.test(input.motion);
+  const camera = cameraLine(input.motion, input.sideView);
+  const mat = floor ? ' A dark gray exercise mat lies on the floor.' : '';
+  const reps = input.holdOrStretch
+    ? 'She moves into the position slowly and holds it with steady breathing, making small natural movements.'
+    : 'She performs two or three slow, controlled repetitions through a full range of motion with correct technique.';
+
+  return [
+    'Vertical 9:16 fitness demonstration video, one continuous shot.',
+    camera,
+    `The person is ${CHARACTER}.`,
+    `Setting: ${SETTING}.${mat}`,
+    equipmentLine(input.equipment),
+    `Movement: ${input.motion}`,
+    `${reps} The clip begins and ends in the same starting position so it can loop seamlessly.`,
+    // Form cues are written as spoken coaching ("Sit your hips back"), which Veo's audio
+    // model tries to voice and then refuses, so they're phrased as a description instead.
+    `Her form is precise: ${input.cues.map((c) => c.charAt(0).toLowerCase() + c.slice(1)).join('; ')}.`,
+    STYLE,
+  ].join('\n');
+}
+
+const HOLD_IDS = new Set(['side-plank']);
+
+/** Standing moves where depth or back angle matter most: filmed from the side. */
+export const SIDE_VIEW_IDS = new Set([
+  'goblet-squat',
+  'reverse-lunge',
+  'split-squat',
+  'romanian-deadlift',
+  'single-leg-rdl',
+  'bent-over-row',
+  'single-arm-row',
+  'rear-delt-fly',
+  'triceps-kickback',
+  'thruster',
+  'dumbbell-swing',
+  'clean-and-press',
+]);
+
+export function allClipSpecs(opts: { includeMoves: boolean }): ClipSpec[] {
+  const exercises: ClipSpec[] = EXERCISES.map((e) => ({
+    id: e.id,
+    name: e.name,
+    kind: 'exercise',
+    prompt: buildPrompt({
+      motion: e.motion,
+      cues: e.cues,
+      equipment: e.equipment,
+      holdOrStretch: HOLD_IDS.has(e.id),
+      sideView: SIDE_VIEW_IDS.has(e.id),
+    }),
+    startFramePrompt: buildStartFramePrompt({ name: e.name, motion: e.motion, equipment: e.equipment, sideView: SIDE_VIEW_IDS.has(e.id) }),
+  }));
+  if (!opts.includeMoves) return exercises;
+  const moves: ClipSpec[] = MOVES.map((m) => ({
+    id: m.id,
+    name: m.name,
+    kind: m.kind,
+    prompt: buildPrompt({ motion: m.motion, cues: m.cues, equipment: 'none', holdOrStretch: m.kind === 'cooldown' }),
+    startFramePrompt: buildStartFramePrompt({ name: m.name, motion: m.motion, equipment: 'none' }),
+  }));
+  return [...exercises, ...moves];
+}
+
+/** The reference-image prompt: a neutral full-body photo of the character. */
+export function characterImagePrompt(): string {
+  return [
+    `Full-body studio photograph, vertical 9:16, of ${CHARACTER}.`,
+    'She stands facing the camera in a relaxed neutral stance, arms at her sides, friendly neutral expression.',
+    `Setting: ${SETTING}.`,
+    'Entire body visible from head to toe with space around her. Photorealistic, sharp focus, natural skin texture.',
+  ].join(' ');
+}
+
+/** Contents of prompts.md: every prompt, for generating clips manually in a web tool. */
+export function renderPromptsMarkdown(): string {
+  const specs = allClipSpecs({ includeMoves: true });
+  const section = (title: string, list: ClipSpec[]) =>
+    [
+      `## ${title}`,
+      '',
+      ...list.flatMap((s) => [`### ${s.name}`, '', `Save as: \`${s.id}.mp4\``, '', '```text', s.prompt, '```', '']),
+    ].join('\n');
+
+  return [
+    '# Demo video prompts',
+    '',
+    '<!-- Generated by `npm run videos:prompts` from src/data and scripts/generate-videos/config.ts. Do not edit by hand. -->',
+    '',
+    'One prompt per clip. Every prompt describes the same character, outfit and studio so the clips match.',
+    '',
+    '**To make a clip by hand** (Google Flow / Gemini, Runway, Kling, Luma, …):',
+    '',
+    '1. Upload `scripts/generate-videos/character.png` as a character or reference image if the tool supports it.',
+    '2. Set the format to **vertical 9:16**, about **8 seconds**, and turn sound off if possible.',
+    '3. Paste the prompt. If the tool has a negative-prompt field, paste the one below.',
+    '4. Download the clip, name it exactly as shown ("Save as"), and put it in `scripts/generate-videos/inbox/`.',
+    '5. Run `npm run videos:import`. It compresses the clip, makes it loop smoothly, and creates the thumbnail.',
+    '',
+    '**Negative prompt** (for every clip):',
+    '',
+    '```text',
+    NEGATIVE_PROMPT,
+    '```',
+    '',
+    section('Exercises', specs.filter((s) => s.kind === 'exercise')),
+    section('Warm-up moves (optional)', specs.filter((s) => s.kind === 'warmup')),
+    section('Cool-down stretches (optional)', specs.filter((s) => s.kind === 'cooldown')),
+  ].join('\n');
+}
